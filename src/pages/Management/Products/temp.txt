@@ -1,0 +1,181 @@
+<Form.List name="variants">
+            {(fields, { add, remove }) => (
+              <>
+                {/* Hiển thị các trường cho mỗi option */}
+                {fields.map((field, index) => (
+                  <div key={field.key}>
+                    {/* Form.Item cho trường "Title" */}
+                    <Form.Item
+                      label={`Tên biến thể ${index}`}
+                      name={[field.name, "title"]}
+                    >
+                      <Input />
+                    </Form.Item>
+
+                    {/* Form.Item cho trường "price_adjustment" */}
+                    <Form.Item
+                      label={`Giá biến thể ${index}`}
+                      name={[field.name, "price_adjustment"]}
+                    >
+                      <InputNumber />
+                    </Form.Item>
+
+                    {/* Form.Item cho trường "position" */}
+                    <Form.Item
+                      label={`Vị trí biến thể  ${index}`}
+                      name={[field.name, "position"]}
+                    >
+                      <InputNumber />
+                    </Form.Item>
+
+                    {/* Form.List cho danh sách "options" */}
+                    <Form.List name="options">
+                      {(fieldsOption, { add, remove }) => (
+                        <>
+                          {/* Hiển thị các trường cho mỗi option */}
+                          {fieldsOption.map((fieldOpp, index) => (
+                            <div key={fieldOpp.key}>
+                              {/* Form.Item cho trường "Option Value" */}
+                              <Form.Item
+                                label={`Option Value ${index}`}
+                                name={[fieldOpp.name, "value"]}
+                              >
+                                <Input />
+                              </Form.Item>
+                              {/* Form.Item cho trường "Add Valuation" */}
+                              <Form.Item
+                                label={`Add Valuation ${index}`}
+                                name={[fieldOpp.name, "add_valuation"]}
+                              >
+                                <InputNumber />
+                              </Form.Item>
+                              {/* Form.Item cho trường "Inventory Quantity" */}
+                              <Form.Item
+                                label={`Inventory Quantity ${index}`}
+                                name={[fieldOpp.name, "inventory_quantity"]}
+                              >
+                                <InputNumber />
+                              </Form.Item>
+                              {/* Form.Item cho trường "Image Source" */}
+                              <Form.Item
+                                label={`Image Source ${index}`}
+                                name={[fieldOpp.name, "images", "src"]}
+                              >
+                                <Input />
+                              </Form.Item>
+                            </div>
+                          ))}
+
+                          {/* Nút để thêm và xoá option */}
+                          <Form.Item>
+                            <button
+                              type="button"
+                              onClick={() => add()}
+                              style={{ marginRight: "8px" }}
+                            >
+                              Thêm tùy chọn
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => remove(fieldsOption.length - 1)}
+                            >
+                              Xóa tùy chọn
+                            </button>
+                          </Form.Item>
+                        </>
+                      )}
+                    </Form.List>
+                  </div>
+                ))}
+
+                {/* Nút để thêm và xoá option */}
+                <Form.Item>
+                  <button
+                    type="button"
+                    onClick={() => add()}
+                    style={{ marginRight: "8px" }}
+                  >
+                    Thêm biến thể
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(fields.length - 1)}
+                  >
+                    Xóa biến thể
+                  </button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+
+
+
+
+
+          ////////////////////////////////
+          Hay
+          <Form.List name="variants">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map((field, index) => (
+                  <div key={field.key}>
+                    <Form.Item
+                      {...field}
+                      label={`Variant ${index + 1}`}
+                      name={[field.name, "title"]}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      {...field}
+                      label="Options"
+                      name={[field.name, "options"]}
+                    >
+                      <Form.List name={[field.name, "options"]}>
+                        {(
+                          optionFields,
+                          { add: addOption, remove: removeOption }
+                        ) => (
+                          <>
+                            {optionFields.map((optionField, optionIndex) => (
+                              <div key={optionField.key}>
+                                <Form.Item
+                                  {...optionField}
+                                  label={`Option ${optionIndex + 1}`}
+                                  name={[optionField.name, "value"]}
+                                >
+                                  <Input />
+                                </Form.Item>
+                                <Form.Item
+                                  {...optionField}
+                                  label="Price Adjustment"
+                                  name={[optionField.name, "add_valuation"]}
+                                >
+                                  <Input />
+                                </Form.Item>
+                                {/* Thêm các trường khác cho biến thể ở đây (ví dụ: inventory_quantity, images) */}
+                                <Button
+                                  onClick={() => removeOption(optionField.name)}
+                                >
+                                  Remove Option
+                                </Button>
+                              </div>
+                            ))}
+                            <Button type="dashed" onClick={() => addOption()}>
+                              Add Option
+                            </Button>
+                          </>
+                        )}
+                      </Form.List>
+                    </Form.Item>
+                    <Button onClick={() => remove(field.name)}>
+                      Remove Variant
+                    </Button>
+                  </div>
+                ))}
+                <Button type="dashed" onClick={() => add()}>
+                  Add Variant
+                </Button>
+              </>
+            )}
+          </Form.List>
