@@ -1,4 +1,4 @@
-export interface IEmployees {
+export interface ICustomer {
   _id?: object;
   full_name?: string;
   image_url?: string;
@@ -6,7 +6,6 @@ export interface IEmployees {
   phone_number?: string;
   address?: string;
   active?: boolean;
-  roles?: string;
   is_delete?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
