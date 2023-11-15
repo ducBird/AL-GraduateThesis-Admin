@@ -15,6 +15,7 @@ import {
   DatePicker,
   Select,
   InputRef,
+  Switch,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import {
@@ -23,6 +24,7 @@ import {
   DeleteOutlined,
   QuestionCircleOutlined,
   SearchOutlined,
+  MinusCircleOutlined,
 } from "@ant-design/icons";
 import type { ColumnType, ColumnsType } from "antd/es/table";
 import { columnProducts } from "./columnProducts";
@@ -33,19 +35,17 @@ import moment from "moment";
 import Highlighter from "react-highlight-words";
 import { ICategory } from "../../../interfaces/Category";
 import { ISubCategory } from "../../../interfaces/SubCategory";
-import { ISupplier } from "../../../interfaces/Supplier";
-import { IVariant } from "../../../interfaces/Variant";
 import { FilterConfirmProps } from "antd/es/table/interface";
 import axios from "axios";
 import { API_URL } from "../../../constants/URLS";
 import { FaTrashRestore } from "react-icons/fa";
 import { useUser } from "../../../hooks/useUser";
+import VariantModal from "./VariantModal";
 export default function Products() {
   //--- state để render dữ liệu ở columns, productField và xử lý <Select/> trong Form antd ---//
   const [products, setProducts] = useState<IProduct[]>([]);
   const [isProducts, setIsProducts] = useState<IProduct[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);
-  const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
   const [subCategoriesCreateForm, setSubCategoriesCreateForm] = useState<
     ISubCategory[]
   >([]);
@@ -55,6 +55,7 @@ export default function Products() {
   const [selectedCategoryId, setSelectedCategoryId] = useState();
   const [selectedRecord, setSelectedRecord] = useState<IProduct>({});
   const [editFormDelete, setEditFormDelete] = useState(false);
+  const [productVariants, setProductVariants] = useState<IProduct>({});
   // File
   const [file, setFile] = useState<any>();
   //----------------------------------------------------------------//
@@ -62,16 +63,18 @@ export default function Products() {
   //--- state quản lý đóng mở Modal ---//
   const [createFormVisible, setCreateFormVisible] = useState(false);
   const [editFormVisible, setEditFormVisible] = useState(false);
-  const [openModalVariant, setOpenModalVariant] = useState(false);
+  const [openModalAttribute, setOpenModalAttribute] = useState(false);
   //----------------------------------------------------------------//
 
   //--- state xử lý render khi có sự thay đổi ở useEffect ---//
   const [refresh, setRefresh] = useState(0);
+  //--- state kiểm tra sản phẩm có biến thể không ---//
+  const [isVariant, setIsVariant] = useState(false);
   //----------------------------------------------------------------//
-  const [variants, setVariants] = useState<IVariant[]>([]);
   const { users } = useUser((state) => state) as any;
   const userString = localStorage.getItem("user-storage");
   const user = userString ? JSON.parse(userString) : null;
+  const [openVariant, setOpenVariant] = useState(false);
   //State search
   type DataIndex = keyof IProduct;
   const [searchText, setSearchText] = useState("");
@@ -80,7 +83,7 @@ export default function Products() {
   // Form
   const [createForm] = Form.useForm();
   const [updateForm] = Form.useForm();
-  const [variantForm] = Form.useForm();
+  const [attributeForm] = Form.useForm();
 
   //gets list products
   useEffect(() => {
@@ -163,22 +166,6 @@ export default function Products() {
         });
     }
   }, [selectedRecord.category?._id]);
-  //get list suppliers
-  useEffect(() => {
-    axiosClient
-      .get(`/suppliers`)
-      .then((response) => {
-        const filteredSuppliers = response.data.filter(
-          (supplier: ISupplier) => {
-            return supplier.is_delete === false;
-          }
-        );
-        setSuppliers(filteredSuppliers);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
   //Search
   const handleSearch = (
     selectedKeys: string[],
@@ -355,10 +342,21 @@ export default function Products() {
               <Button
                 type="primary"
                 onClick={() => {
-                  setOpenModalVariant(true);
+                  setOpenModalAttribute(true);
                   setSelectedRecord(record);
-                  variantForm.setFieldsValue(record);
+                  attributeForm.setFieldsValue(record);
+                  console.log(record);
+                }}
+              >
+                Thuộc tính
+              </Button>
+              {/* Button Variant */}
+              <Button
+                type="primary"
+                onClick={() => {
+                  setOpenVariant(true);
                   // console.log(record);
+                  setProductVariants(record);
                 }}
               >
                 Biến thể
@@ -374,20 +372,10 @@ export default function Products() {
                     record.updatedAt,
                     "YYYY-MM-DD HH:mm:ss"
                   );
-                  const formattedDateOfManufacture = moment(
-                    record.date_of_manufacture,
-                    "YYYY-MM-DD HH:mm:ss"
-                  );
-                  const formattedExpirationDate = moment(
-                    record.expiration_date,
-                    "YYYY-MM-DD HH:mm:ss"
-                  );
                   const updatedRecord = {
                     ...record,
                     createdAt: formattedCreatedAt,
                     updatedAt: formattedUpdatedAt,
-                    date_of_manufacture: formattedDateOfManufacture,
-                    expiration_date: formattedExpirationDate,
                   };
                   setSelectedRecord(updatedRecord);
                   updateForm.setFieldsValue(updatedRecord);
@@ -404,14 +392,14 @@ export default function Products() {
                   axiosClient
                     .patch(
                       "/products/" + id,
-                      { is_delete: true },
-                      {
-                        headers: {
-                          access_token: `Bearer ${window.localStorage.getItem(
-                            "access_token"
-                          )}`,
-                        },
-                      }
+                      { is_delete: true }
+                      // {
+                      //   headers: {
+                      //     access_token: `Bearer ${window.localStorage.getItem(
+                      //       "access_token"
+                      //     )}`,
+                      //   },
+                      // }
                     )
                     .then(() => {
                       message.success("Xóa thành công!");
@@ -473,13 +461,16 @@ export default function Products() {
                 onConfirm={() => {
                   const id = record._id;
                   axiosClient
-                    .delete("/products/" + id, {
-                      headers: {
-                        access_token: `Bearer ${window.localStorage.getItem(
-                          "access_token"
-                        )}`,
-                      },
-                    })
+                    .delete(
+                      "/products/" + id
+                      // {
+                      //   headers: {
+                      //     access_token: `Bearer ${window.localStorage.getItem(
+                      //       "access_token"
+                      //     )}`,
+                      //   },
+                      // }
+                    )
                     .then(() => {
                       message.success("Xóa thành công!");
                       setRefresh((f) => f + 1);
@@ -502,14 +493,14 @@ export default function Products() {
                   axiosClient
                     .patch(
                       "/products/" + id,
-                      { is_delete: false },
-                      {
-                        headers: {
-                          access_token: `Bearer ${window.localStorage.getItem(
-                            "access_token"
-                          )}`,
-                        },
-                      }
+                      { is_delete: false }
+                      // {
+                      //   headers: {
+                      //     access_token: `Bearer ${window.localStorage.getItem(
+                      //       "access_token"
+                      //     )}`,
+                      //   },
+                      // }
                     )
                     .then((response) => {
                       setRefresh((f) => f + 1);
@@ -594,14 +585,14 @@ export default function Products() {
       name: "sub_category_id",
       label: "Danh mục con",
       /* sử dụng defaultValue ở phía dưới sẽ bị antd cảnh báo nên sử dụng initialValue cho field ở <CustomForm /> */
-      initialValue: editFormVisible
-        ? [
-            {
-              value: selectedRecord?.sub_category?._id,
-              label: selectedRecord?.sub_category?.name,
-            },
-          ]
-        : "",
+      // initialValue: editFormVisible
+      //   ? [
+      //       {
+      //         value: selectedRecord?.sub_category?._id,
+      //         label: selectedRecord?.sub_category?.name,
+      //       },
+      //     ]
+      //   : "",
       component: !editFormVisible ? (
         <Select
           allowClear
@@ -638,26 +629,43 @@ export default function Products() {
       ),
     },
     {
-      name: "supplier_id",
-      label: "Nhà cung cấp",
-      rules: [
-        {
-          required: true,
-          message: "Nhà cung cấp không được để trống!",
-        },
-      ],
+      name: "is_variant",
+      label: "Biến thể",
+      initialValue: false,
       component: (
-        <Select
-          allowClear
-          options={
-            suppliers &&
-            suppliers.map((supplier) => {
-              return {
-                value: supplier._id,
-                label: supplier.name,
-              };
-            })
-          }
+        <Switch
+          checked={isVariant}
+          checkedChildren="Có"
+          unCheckedChildren="Không"
+          onChange={() => {
+            setIsVariant(!isVariant);
+          }}
+        />
+      ),
+    },
+    {
+      name: "price",
+      label: "Giá",
+      initialValue: undefined,
+      noStyle: isVariant ? false : true,
+      component: (
+        <InputNumber
+          style={{
+            display: isVariant ? "" : "none",
+          }}
+        />
+      ),
+    },
+    {
+      name: "stock",
+      label: "Số lượng",
+      initialValue: undefined,
+      noStyle: isVariant ? false : true,
+      component: (
+        <InputNumber
+          style={{
+            display: isVariant ? "" : "none",
+          }}
         />
       ),
     },
@@ -686,22 +694,18 @@ export default function Products() {
       component: <InputNumber />,
     },
     {
-      name: "date_of_manufacture",
-      label: "Ngày sản xuất",
-      initialValue: moment(new Date(), "YYYY-MM-DD HH:mm:ss"),
+      name: "file",
+      label: "Hình ảnh",
       component: (
-        <DatePicker format={"YYYY/MM/DD-HH:mm:ss"} placeholder="Chọn ngày" />
-      ),
-    },
-    {
-      name: "expiration_date",
-      label: "Ngày hết hạn",
-      initialValue: moment(
-        new Date(new Date().getFullYear() + 1, new Date().getMonth()),
-        "YYYY-MM-DD HH:mm:ss"
-      ),
-      component: (
-        <DatePicker format={"YYYY/MM/DD-HH:mm:ss"} placeholder="Chọn ngày" />
+        <Upload
+          showUploadList={true}
+          beforeUpload={(file) => {
+            setFile(file);
+            return false;
+          }}
+        >
+          <Button icon={<UploadOutlined />}>Tải lên hình ảnh</Button>
+        </Upload>
       ),
     },
     {
@@ -745,7 +749,7 @@ export default function Products() {
     //     <Button
     //       type="dashed"
     //       onClick={() => {
-    //         setOpenModalVariant(true);
+    //         setOpenModalAttribute(true);
     //       }}
     //     >
     //       Biến thể
@@ -773,11 +777,15 @@ export default function Products() {
   // };
   const onCreateFinish = (values: any) => {
     axiosClient
-      .post("/products", values, {
-        headers: {
-          access_token: `Bearer ${window.localStorage.getItem("access_token")}`,
-        },
-      })
+      .post(
+        "/products",
+        values
+        // {
+        //   headers: {
+        //     access_token: `Bearer ${window.localStorage.getItem("access_token")}`,
+        //   },
+        // }
+      )
       .then((response) => {
         if (values.file !== undefined) {
           //UPLOAD FILE
@@ -787,8 +795,8 @@ export default function Products() {
           axios
             .post(`${API_URL}/upload/products/${_id}`, formData)
             .then((response) => {
-              message.success("Tải lên hình ảnh thành công!");
-              // createForm.resetFields();
+              setRefresh((f) => f + 1);
+              message.success("Thêm mới thành công!");
             })
             .catch((err) => {
               message.error("Tải lên hình ảnh thất bại!");
@@ -813,11 +821,15 @@ export default function Products() {
 
   const onUpdateFinish = (values: IProduct) => {
     axiosClient
-      .patch("/products/" + selectedRecord._id, values, {
-        headers: {
-          access_token: `Bearer ${window.localStorage.getItem("access_token")}`,
-        },
-      })
+      .patch(
+        "/products/" + selectedRecord._id,
+        values
+        // {
+        //   headers: {
+        //     access_token: `Bearer ${window.localStorage.getItem("access_token")}`,
+        //   },
+        // }
+      )
       .then(() => {
         message.success("Cập nhật thành công!");
         setRefresh((f) => f + 1);
@@ -834,98 +846,87 @@ export default function Products() {
     console.log("💣💣💣 ", errors);
   };
 
-  const onVariantFinish = (values: any) => {
-    if (!selectedRecord.variants?.length) {
+  const onAttributeFinish = (values: any) => {
+    if (!selectedRecord.attributes?.length) {
       console.log("created");
-      createVariants(values);
+      createAttribute(values);
     } else {
       console.log("updated");
-      updateVariants(values);
+      updateAttribute(values);
     }
   };
-  const createVariants = (values: any) => {
-    const updateVariants: any = [];
-    values.variants.map((v: any, index: number) => {
-      const valueVariants = { ...v, product_id: selectedRecord._id };
+  const createAttribute = (values: any) => {
+    console.log("values", values);
+
+    const updateAttribute: any = [];
+    values.attributes.map((v: any, index: number) => {
+      const valueAttribute = { ...v, product_id: selectedRecord._id };
       axiosClient
-        .post("/variants-p/", valueVariants, {
-          headers: {
-            access_token: `Bearer ${window.localStorage.getItem(
-              "access_token"
-            )}`,
-          },
-        })
+        .post(
+          "/attributes-p/",
+          valueAttribute
+          // {
+          //   headers: {
+          //     access_token: `Bearer ${window.localStorage.getItem(
+          //       "access_token"
+          //     )}`,
+          //   },
+          // }
+        )
         .then((res) => {
-          const variantId = res.data.id;
+          const attributeId = res.data.id;
           console.log(res.data);
-          updateVariants.push(variantId);
-          // console.log("valueVariants", valueVariants);
+          updateAttribute.push(attributeId);
+          // console.log("valueAttribute", valueAttribute);
           // console.log("res.data", res.data);
-          // console.log("updateVariants",updateVariants);
-          if (valueVariants.file !== undefined) {
-            //UPLOAD FILE
-            const { _id } = res.data;
-            const formData = new FormData();
-            formData.append("file", file);
-            axios
-              .post(`${API_URL}/upload/variants/${_id}`, formData)
-              .then((response) => {
-                message.success("Tải lên hình ảnh thành công!");
-                // createForm.resetFields();
-              })
-              .catch((err) => {
-                message.error("Tải lên hình ảnh thất bại!");
-                console.log(err);
-              });
-          }
+          console.log("updateAttribute", updateAttribute);
           axiosClient.patch(
             "/products/" + selectedRecord._id,
             {
-              variants: updateVariants,
-            },
-            {
-              headers: {
-                access_token: `Bearer ${window.localStorage.getItem(
-                  "access_token"
-                )}`,
-              },
+              attributes: updateAttribute,
             }
+            // {
+            //   headers: {
+            //     access_token: `Bearer ${window.localStorage.getItem(
+            //       "access_token"
+            //     )}`,
+            //   },
+            // }
           );
           setRefresh((f) => f + 1);
-          // setOpenModalVariant(false);
-          message.success(`Biến thể ${index + 1} đã được cập nhật!`);
+          // setOpenModalAttribute(false);
+          message.success(`Thuộc tính ${index + 1} đã được cập nhật!`);
         })
         .catch((err) => {
-          message.error("Cập nhật biến thể thất bại!");
+          message.error("Cập nhật Thuộc tính thất bại!");
           message.error(err.response.data.msg);
           message.error(err.response.data);
           console.log(err);
         });
     });
   };
-  const updateVariants = (values: any) => {
-    console.log(values);
+  const updateAttribute = (values: any) => {
     axios
       .put(
-        // "https://be-aquatic-land.onrender.com/variants-p/updateVariants",
-        "http://localhost:9000/variants-p/updateVariants",
+        // "https://be-aquatic-land.onrender.com/attributes-p/updateAttributes",
+        "http://localhost:9000/attributes-p/updateAttributes",
         {
           values,
           product_id: selectedRecord._id,
-        },
-        {
-          headers: {
-            access_token: `Bearer ${window.localStorage.getItem(
-              "access_token"
-            )}`,
-          },
         }
+        // {
+        //   headers: {
+        //     access_token: `Bearer ${window.localStorage.getItem(
+        //       "access_token"
+        //     )}`,
+        //   },
+        // }
       )
       .then((res) => {
-        const variantArray = res.data.map((variant: any) => {
-          return variant.options;
+        const attributeArray = res.data.map((attribute: any) => {
+          return attribute.options;
         });
-        console.log("variantArray", variantArray);
+        console.log("attributeArray", attributeArray);
 
         console.log("res.data", res.data);
         message.success("Cập nhật thành công!");
@@ -938,7 +939,7 @@ export default function Products() {
         console.log(err);
       });
   };
-  const onVariantFinishFailed = (errors: object) => {
+  const onAttributeFinishFailed = (errors: object) => {
     console.log(errors);
   };
 
@@ -1016,130 +1017,105 @@ export default function Products() {
         />
       </Modal>
 
-      {/* --- VARIANT FORM --- */}
+      {/* Modal Attribute */}
       <Modal
         centered
         width={"50%"}
-        open={openModalVariant}
-        title="Biến thể"
+        open={openModalAttribute}
+        title="Thuộc tính"
         onOk={() => {
-          variantForm.submit();
+          attributeForm.submit();
+          setOpenModalAttribute(false);
         }}
         onCancel={() => {
-          setOpenModalVariant(false);
+          setOpenModalAttribute(false);
         }}
         okText="Lưu"
         cancelText="Đóng"
       >
-        {/* UPDATE VARIANT FORM */}
         <Form
-          form={variantForm}
-          name="variant-form"
+          form={attributeForm}
+          name="attribute-form"
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
-          onFinish={onVariantFinish}
-          onFinishFailed={onVariantFinishFailed}
+          onFinish={onAttributeFinish}
+          onFinishFailed={onAttributeFinishFailed}
         >
-          <Form.List name="variants">
+          <Form.List name="attributes">
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field, index) => (
                   <div key={field.key}>
-                    <h4 style={{ marginTop: 0 }}>Biến thể {index + 1}</h4>
+                    <h4 style={{ marginTop: 0 }}>Thuộc tính {index + 1}</h4>
                     <Form.Item
-                      label={`Tên biến thể`}
-                      name={[field.name, "title"]}
+                      label={`Tên thuộc tính`}
+                      name={[field.name, "attribute_name"]}
                     >
                       <Input />
                     </Form.Item>
                     <Form.Item
-                      label={`Giá điều chỉnh`}
-                      name={[field.name, "price_adjustment"]}
+                      label="Giá trị thuộc tính"
+                      name={[field.name, "values"]}
                     >
-                      <InputNumber />
-                    </Form.Item>
-                    <Form.Item
-                      label={`Thứ tứ xếp`}
-                      name={[field.name, "position"]}
-                    >
-                      <InputNumber />
-                    </Form.Item>
-                    <Form.Item label="Tùy chọn" name={[field.name, "options"]}>
-                      <Form.List name={[field.name, "options"]}>
+                      <Form.List name={[field.name, "values"]}>
                         {(
-                          optionFields,
-                          { add: addOption, remove: removeOption }
+                          valuesFields,
+                          { add: addValue, remove: removeValue }
                         ) => (
                           <>
-                            {optionFields.map((optionField, optionIndex) => (
+                            {valuesFields.map((valueField, valueIndex) => (
                               <div
-                                key={optionField.key}
-                                className={style.option_container}
+                                key={valueField.key}
+                                style={{ marginBottom: 24 }}
                               >
                                 <Form.Item
-                                  label={`Tùy chọn ${optionIndex + 1}`}
-                                  name={[optionField.name, "value"]}
+                                  label={`Giá trị ${valueIndex + 1}`}
+                                  name={[valueField.name]}
+                                  noStyle
                                 >
-                                  <Input />
+                                  {/* Input */}
+                                  <Input style={{ width: "60%" }} />
                                 </Form.Item>
-                                <Form.Item
-                                  label="Giá cộng thêm"
-                                  name={[optionField.name, "add_valuation"]}
+                                {/* Nút xóa Input */}
+                                <Popconfirm
+                                  icon={
+                                    <QuestionCircleOutlined
+                                      style={{ color: "red" }}
+                                    />
+                                  }
+                                  title="Bạn có chắc chắn muốn xóa?"
+                                  onConfirm={() => {
+                                    removeValue(valueField.name);
+                                  }}
+                                  okText="Có"
+                                  cancelText="Không"
                                 >
-                                  <InputNumber />
-                                </Form.Item>
-                                <Form.Item
-                                  label="Tồn kho"
-                                  name={[
-                                    optionField.name,
-                                    "inventory_quantity",
-                                  ]}
-                                >
-                                  <InputNumber />
-                                </Form.Item>
-                                <Form.Item
-                                  label={`Hình ảnh`}
-                                  name={[optionField.name, "images"]}
-                                >
-                                  <Upload
-                                    showUploadList={true}
-                                    beforeUpload={(file) => {
-                                      setFile(file);
-                                      return false;
-                                    }}
-                                  >
-                                    <Button
-                                      onClick={() => {
-                                        console.log("Clicked");
+                                  {valuesFields.length > 1 ? (
+                                    <MinusCircleOutlined
+                                      style={{
+                                        fontSize: 20,
+                                        marginLeft: 5,
+                                        color: "red",
                                       }}
-                                      icon={<UploadOutlined />}
-                                    >
-                                      Tải lên hình ảnh
-                                    </Button>
-                                  </Upload>
-                                </Form.Item>
-                                <Button
-                                  danger
-                                  onClick={() => removeOption(optionField.name)}
-                                >
-                                  Xóa tùy chọn
-                                </Button>
+                                    />
+                                  ) : null}
+                                </Popconfirm>
                               </div>
                             ))}
-                            <Button type="dashed" onClick={() => addOption()}>
-                              Thêm tùy chọn
+                            <Button type="dashed" onClick={() => addValue()}>
+                              Thêm giá trị
                             </Button>
                           </>
                         )}
                       </Form.List>
                     </Form.Item>
                     <Button danger onClick={() => remove(field.name)}>
-                      Xóa biến thể
+                      Xóa thuộc tính
                     </Button>
                   </div>
                 ))}
                 <Button type="dashed" onClick={() => add()}>
-                  Thêm biến thể
+                  Thêm thuộc tính
                 </Button>
               </>
             )}
@@ -1159,6 +1135,16 @@ export default function Products() {
           columns={isDeletColumns}
         />
       </Modal>
+
+      {openVariant ? (
+        <VariantModal
+          productVariants={productVariants}
+          openVariant={openVariant}
+          setOpenVariant={setOpenVariant}
+        />
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
