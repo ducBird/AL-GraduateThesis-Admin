@@ -156,6 +156,14 @@ export default function Orders() {
       </div>
     );
   };
+  // CHỜ XÁC NHẬN || WAIT FOR CONFIRMATION
+  // CHỜ LẤY HÀNG || WAITING FOR PICKUP
+  // ĐANG GIAO || DELIVERING
+  // ĐÃ GIAO || DELIVERED
+  // ĐÃ HỦY || CANCELLED
+  // TRẢ HÀNG || RETURNS
+  // ĐANG TRẢ HÀNG || RETURNING
+  // ĐÃ TRẢ || RETURNED
 
   const productColumns = [
     {
@@ -695,7 +703,6 @@ export default function Orders() {
 
                       setAddProductsModalVisible(false);
                       // RELOAD //
-
                       setRefresh((f) => f + 1);
                     }}
                   >
