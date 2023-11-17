@@ -16,7 +16,7 @@ export default function HeaderMenu() {
           window.location.href = "/";
         }}
       >
-        Logout
+        Đăng xuất
       </button>
     </div>
   );

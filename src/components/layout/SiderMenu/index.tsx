@@ -17,8 +17,10 @@ import { FaShippingFast } from "react-icons/fa";
 import { RiLuggageDepositLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { Menu } from "antd";
+import { useUser } from "../../../hooks/useUser";
 
 export default function SiderMenu() {
+  const { users } = useUser((state) => state) as any;
   const navigate = useNavigate();
   const itemsSider = [
     { label: "Trang Chủ", key: "home", icon: <AiOutlineHome /> }, // remember to pass the key prop
@@ -59,6 +61,11 @@ export default function SiderMenu() {
           key: "management-accumulated",
           icon: <RiLuggageDepositLine />,
         },
+        {
+          label: "Vouchers",
+          key: "management-vouchers",
+          icon: <AiOutlineShopping />,
+        },
         // {
         //   label: "Nhà cung cấp",
         //   key: "management-suppliers",
@@ -73,24 +80,45 @@ export default function SiderMenu() {
       children: [
         {
           label: "Thống kê",
-          key: "orders",
+          key: "sales-statistics",
           icon: <MdOutlineArticle />,
           children: [
             {
-              label: "Theo trạng thái đơn hàng",
-              key: "orders-status",
+              label: "Đơn hàng",
+              key: "sales-statistics-orders",
+              icon: <MdOutlineArticle />,
+              children: [
+                {
+                  label: "Theo trạng thái",
+                  key: "sales-orders-by-status",
+                },
+                {
+                  label: "Theo hình thức thanh toán",
+                  key: "sales-orders-by-payment_information",
+                },
+                {
+                  label: "Theo trạng thái thanh toán",
+                  key: "sales-orders-by-payment_status",
+                },
+                {
+                  label: "Theo số điện thoại",
+                  key: "sales-statistics-orders-number",
+                },
+                {
+                  label: "Theo ngày cần tìm",
+                  key: "sales-statistics-orders-day",
+                },
+              ],
             },
             {
-              label: "Theo hình thức thanh toán",
-              key: "orders-payment",
+              label: "Sản phẩm",
+              key: "sales-statistics-products",
+              icon: <AiOutlineShopping />,
             },
             {
-              label: "Theo số điện thoại",
-              key: "orders-number",
-            },
-            {
-              label: "Theo ngày cần tìm",
-              key: "orders-day",
+              label: "Khách hàng",
+              key: "sales-statistics-customers",
+              icon: <MdOutlinePeopleAlt />,
             },
           ],
         },
@@ -101,14 +129,10 @@ export default function SiderMenu() {
       key: "shipping",
       icon: <FaShippingFast />,
       children: [
-        { label: "Chưa vận chuyển", key: "orders-notshipped" },
+        { label: "Đơn mua", key: "shipping-purchase" },
         {
-          label: "Đang vận chuyển",
-          key: "orders-shipping",
-        },
-        {
-          label: "Đã vận chuyển",
-          key: "orders-shipped",
+          label: "Đơn trả",
+          key: "shipping-return",
         },
       ],
     },
@@ -131,14 +155,10 @@ export default function SiderMenu() {
       key: "shipping",
       icon: <FaShippingFast />,
       children: [
-        { label: "Chưa vận chuyển", key: "orders-notshipped" },
+        { label: "Đơn mua", key: "shipping-purchase" },
         {
-          label: "Đang vận chuyển",
-          key: "orders-shipping",
-        },
-        {
-          label: "Đã vận chuyển",
-          key: "orders-shipped",
+          label: "Đơn trả",
+          key: "shipping-return",
         },
       ],
     },
@@ -159,7 +179,7 @@ export default function SiderMenu() {
   return (
     <div>
       <Menu
-        items={itemsSider}
+        items={users.user.roles === "admin" ? itemsSider : itemsSiderShipper}
         mode="inline"
         onClick={({ item, key }) => {
           navigate("/" + key.split("-").join("/")); //
