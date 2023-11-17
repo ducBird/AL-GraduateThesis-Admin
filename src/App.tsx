@@ -1,5 +1,5 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "antd";
 import HeaderMenu from "./components/layout/HeaderMenu";
@@ -20,6 +20,7 @@ import "numeral/locales/vi";
 import OrdersByStatus from "./pages/Sales/Orders/OrdersByStatus";
 import OrdersByPaymentInformation from "./pages/Sales/Orders/OrdersByPaymentInformation";
 import OrdersByPaymentStatus from "./pages/Sales/Orders/OrdersByPaymentStatus";
+import Vouchers from "./pages/Management/Vouchers";
 import PurchaseOrder from "./pages/Shipping/PurchaseOrder";
 import ReturnOrder from "./pages/Shipping/ReturnOrder";
 numeral.locale("vi");
@@ -28,7 +29,6 @@ const { Header, Content, Sider } = Layout;
 
 function App() {
   const { users, initialize, refreshToken } = useUser((state) => state) as any;
-  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     if (Object.keys(users).length !== 0) {
@@ -58,16 +58,7 @@ function App() {
             )}
           </Header>
           <Layout>
-            <Sider
-              theme="light"
-              width={"20%"}
-              style={{ minHeight: "100vh" }}
-              collapsible
-              collapsed={collapsed}
-              onCollapse={() => {
-                setCollapsed(!collapsed);
-              }}
-            >
+            <Sider theme="light" width={"20%"} style={{ minHeight: "100vh" }}>
               {window.localStorage.getItem("refresh_token") ? (
                 <SiderMenu />
               ) : (
@@ -111,6 +102,7 @@ function App() {
                     path="/management/accumulated"
                     element={<Accumulated />}
                   />
+                  <Route path="/management/vouchers" element={<Vouchers />} />
                   <Route path="/sales/orders" element={<Orders />} />
 
                   {/* thống kê */}
