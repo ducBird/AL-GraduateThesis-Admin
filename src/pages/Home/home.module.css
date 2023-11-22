@@ -1,0 +1,10 @@
+.home_header {
+  height: 100px;
+  background-color: #005aa9;
+  color: white;
+  display: flex;
+  justify-content: space-between; /* Đặt giữa các phần tử */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  font-size: 20px;
+  padding: 20px;
+}
