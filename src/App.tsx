@@ -7,7 +7,6 @@ import SiderMenu from "./components/layout/SiderMenu";
 import Categories from "./pages/Management/Categories";
 import Products from "./pages/Management/Products";
 import SubCategories from "./pages/Management/SubCategories";
-import Suppliers from "./pages/Management/Suppliers";
 import Customers from "./pages/Management/Customers";
 import Employees from "./pages/Management/Employees";
 import Accumulated from "./pages/Management/Accumulated";
@@ -105,7 +104,6 @@ function App() {
                     path="/management/subCategories"
                     element={<SubCategories />}
                   />
-                  <Route path="/management/suppliers" element={<Suppliers />} />
                   <Route path="/management/customers" element={<Customers />} />
                   <Route path="/management/employees" element={<Employees />} />
                   <Route
