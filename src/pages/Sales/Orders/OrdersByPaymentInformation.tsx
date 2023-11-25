@@ -1,4 +1,13 @@
-import { Button, DatePicker, Form, Select, Table, message, Modal } from "antd";
+import {
+  Button,
+  DatePicker,
+  Form,
+  Select,
+  Table,
+  message,
+  Modal,
+  Tag,
+} from "antd";
 import numeral from "numeral";
 import React from "react";
 import { axiosClient } from "../../../libraries/axiosClient";
@@ -8,6 +17,21 @@ import { IOrders } from "../../../interfaces/IOrders";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import ExcelJS from "exceljs";
+import {
+  CheckCircleFilled,
+  CheckCircleOutlined,
+  CheckSquareFilled,
+  ClockCircleFilled,
+  ClockCircleOutlined,
+  CloseCircleFilled,
+  CloseCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  LoginOutlined,
+  PlayCircleOutlined,
+  RollbackOutlined,
+  SelectOutlined,
+} from "@ant-design/icons";
 function OrdersByPaymentInformation() {
   const [isModalVisible, setIsModalVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -30,6 +54,51 @@ function OrdersByPaymentInformation() {
   };
   const renderStatus = (result: any) => {
     return (
+      <div>
+        {result && result === "WAIT FOR CONFIRMATION" ? (
+          <Tag icon={<ClockCircleFilled />} color="default">
+            Chờ xác nhận
+          </Tag>
+        ) : result === "WAITING FOR PICKUP" ? (
+          <Tag icon={<ClockCircleOutlined />} color="warning">
+            Chờ lấy hàng
+          </Tag>
+        ) : result === "DELIVERING" ? (
+          <Tag icon={<PlayCircleOutlined />} color="processing">
+            Đang giao
+          </Tag>
+        ) : result === "DELIVERED" ? (
+          <Tag icon={<CheckCircleOutlined />} color="success">
+            Đã giao
+          </Tag>
+        ) : result === "RECEIVED" ? (
+          <Tag icon={<CheckSquareFilled />} color="#177245">
+            Đã nhận
+          </Tag>
+        ) : result === "CANCELLED" ? (
+          <Tag icon={<CloseCircleOutlined />} color="error">
+            Đã hủy
+          </Tag>
+        ) : result === "RETURNS" ? (
+          <Tag icon={<RollbackOutlined />} color="volcano">
+            Trả hàng
+          </Tag>
+        ) : result === "RETURNING" ? (
+          <Tag icon={<LoginOutlined />} color="geekblue">
+            Đang trả hàng
+          </Tag>
+        ) : result === "RETURNED" ? (
+          <Tag icon={<SelectOutlined />} color="#000">
+            Đã trả hàng
+          </Tag>
+        ) : (
+          "Null"
+        )}
+      </div>
+    );
+  };
+  const renderStatusForExcel = (result: any) => {
+    return (
       result &&
       (result === "WAIT FOR CONFIRMATION"
         ? "Chờ xác nhận"
@@ -51,17 +120,6 @@ function OrdersByPaymentInformation() {
     );
   };
 
-  const renderPaymentStatus = (result: any) => {
-    return (
-      <div>
-        {result && result === true
-          ? "Đã thanh toán"
-          : result === false
-          ? "Chưa thanh toán"
-          : "Null"}
-      </div>
-    );
-  };
   // Thêm hàm renderPaymentStatusForExcel để xử lý trạng thái thanh toán khi xuất ra Excel
   const renderPaymentStatusForExcel = (result: any) => {
     return result !== undefined && result !== null && result !== ""
@@ -110,6 +168,11 @@ function OrdersByPaymentInformation() {
       },
     },
     {
+      title: "Mã Đơn hàng",
+      dataIndex: "_id",
+      key: "_id",
+    },
+    {
       title: "Khách hàng",
       dataIndex: "customer",
       key: "customer",
@@ -134,8 +197,16 @@ function OrdersByPaymentInformation() {
       title: "trạng thái thanh toán",
       dataIndex: "payment_status",
       key: "payment_status",
-      render: (text: string) => {
-        return renderPaymentStatus(text);
+      render: (text: boolean) => {
+        return (
+          <p style={{ textAlign: "center" }}>
+            {text ? (
+              <CheckCircleFilled style={{ color: "green" }} />
+            ) : (
+              <CloseCircleFilled style={{ color: "red" }} />
+            )}
+          </p>
+        );
       },
     },
     {
@@ -167,7 +238,7 @@ function OrdersByPaymentInformation() {
       dataIndex: "total_money_order",
       key: "total_money_order",
       render: (text: number) => {
-        return <p>{numeral(text).format("0,0").replace(/,/g, ".")} vnđ</p>;
+        return <strong>{numeral(text).format("0,0$")}</strong>;
       },
     },
   ];
@@ -250,7 +321,7 @@ function OrdersByPaymentInformation() {
         }
         // Xử lý trạng thái và thanh toán khi xuất ra Excel
         if (dataIndex === "status") {
-          cellValue = renderStatus(cellValue);
+          cellValue = renderStatusForExcel(cellValue);
         }
         if (dataIndex === "payment_status") {
           cellValue = renderPaymentStatusForExcel(cellValue);
