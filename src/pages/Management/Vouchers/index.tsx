@@ -15,6 +15,7 @@ import {
   Switch,
   Upload,
 } from "antd";
+import numeral from "numeral";
 import moment from "moment";
 import {
   DeleteOutlined,
@@ -90,16 +91,16 @@ function Vouchers() {
       title: "Giá giảm tối đa",
       dataIndex: "maxDiscountAmount",
       key: "maxDiscountAmount",
-      render: (text) => {
-        return <div>{text} %</div>;
+      render: (text: number) => {
+        return <strong>{numeral(text).format("0,0$")}</strong>;
       },
     },
     {
       title: "Giá đơn hàng tối thiểu",
       dataIndex: "minimumOrderAmount",
       key: "minimumOrderAmount",
-      render: (text) => {
-        return <div>{text} %</div>;
+      render: (text: number) => {
+        return <strong>{numeral(text).format("0,0$")}</strong>;
       },
     },
     // {
@@ -126,7 +127,7 @@ function Vouchers() {
         if (text) {
           return <span style={{ color: "green" }}>Đang hoạt động</span>;
         } else {
-          return <span style={{ color: "red" }}>Không hoạt động</span>;
+          return <span style={{ color: "red" }}>Ngừng hoạt động</span>;
         }
       },
     },
@@ -221,19 +222,11 @@ function Vouchers() {
       component: (
         <Switch
           style={{ width: "60px" }}
-          checked={
-            editFormVisible && selectedRecord.isActive
-              ? selectedRecord.isActive
-              : isActive
-          }
+          checked={isActive}
           checkedChildren="Bật"
           unCheckedChildren="Tắt"
           onChange={() => {
-            setIsActive(
-              editFormVisible && selectedRecord.isActive === true
-                ? !selectedRecord.isActive
-                : !isActive
-            );
+            setIsActive(!isActive);
           }}
         />
       ),
@@ -467,6 +460,7 @@ function Vouchers() {
         createForm.resetFields();
         setRefresh((f) => f + 1);
         message.success("Thêm mới thành công!");
+        setCreateFormVisible(false);
       })
       .catch((err) => {
         message.error("Thêm thất bại!");
