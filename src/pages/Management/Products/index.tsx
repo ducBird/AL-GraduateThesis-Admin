@@ -647,11 +647,11 @@ export default function Products() {
       name: "price",
       label: "Giá",
       initialValue: undefined,
-      noStyle: isVariant ? false : true,
+      noStyle: isVariant ? true : false,
       component: (
         <InputNumber
           style={{
-            display: isVariant ? "" : "none",
+            display: isVariant ? "none" : "",
           }}
         />
       ),
@@ -660,11 +660,11 @@ export default function Products() {
       name: "stock",
       label: "Số lượng",
       initialValue: undefined,
-      noStyle: isVariant ? false : true,
+      noStyle: isVariant ? true : false,
       component: (
         <InputNumber
           style={{
-            display: isVariant ? "" : "none",
+            display: isVariant ? "none" : "",
           }}
         />
       ),
