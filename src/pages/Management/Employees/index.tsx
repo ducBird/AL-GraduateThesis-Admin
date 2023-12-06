@@ -7,7 +7,9 @@ import {
   InputRef,
   Modal,
   Popconfirm,
+  Select,
   Space,
+  Switch,
   Table,
   Upload,
   message,
@@ -24,7 +26,7 @@ import {
   SearchOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { addedAttribute } from "../../../utils/AddAttributeToColumns";
+// import { addedAttribute } from "../../../utils/AddAttributeToColumns";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import type { ColumnType, ColumnsType } from "antd/es/table";
@@ -40,6 +42,8 @@ export default function Employees() {
   const [selectedRecord, setSelectedRecord] = useState<IEmployees>({});
   const [createFormVisible, setCreateFormVisible] = useState(false);
   const [editFormDelete, setEditFormDelete] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [checkInputPassword, setCheckInputPassword] = useState(undefined);
   // File
   const [file, setFile] = useState<any>();
   //State search
@@ -54,6 +58,23 @@ export default function Employees() {
   const { users } = useUser((state) => state) as any;
   const userString = localStorage.getItem("user-storage");
   const user = userString ? JSON.parse(userString) : null;
+
+  // Tạo một hàm để kiểm tra mật khẩu có đáp ứng các tiêu chí bảo mật cao hay không
+  const validatePassword = (rule, value, callback) => {
+    // Tạo một regex để kiểm tra mật khẩu có chứa ít nhất một chữ cái hoa, một chữ cái thường, một số và một ký tự đặc biệt
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).+$/;
+
+    // Nếu mật khẩu không khớp với regex, gọi callback với thông báo lỗi
+    if (!passwordRegex.test(value)) {
+      callback(
+        "Mật khẩu phải có ít nhất một chữ cái hoa, một chữ cái thường, một số và một ký tự đặc biệt!"
+      );
+    } else {
+      // Nếu mật khẩu khớp với regex, gọi callback với tham số trống
+      callback();
+    }
+  };
+
   useEffect(() => {
     axiosClient
       .get("/employees", {
@@ -123,7 +144,7 @@ export default function Employees() {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Nhập thông tin tìm kiếm`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -143,14 +164,14 @@ export default function Employees() {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Làm mới
           </Button>
           <Button
             type="link"
@@ -161,7 +182,7 @@ export default function Employees() {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -170,7 +191,7 @@ export default function Employees() {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -202,7 +223,7 @@ export default function Employees() {
   });
   const columns: ColumnsType<IEmployees> = [
     {
-      title: "Name",
+      title: "Tên",
       dataIndex: "full_name",
       key: "full_name",
       ...getColumnSearchProps("full_name"),
@@ -216,9 +237,9 @@ export default function Employees() {
           <div style={{ textAlign: "center" }}>
             {text && (
               <img
-                style={{ maxWidth: 150, width: "40%", minWidth: 70 }}
+                style={{ maxWidth: 150, width: "10%", minWidth: 50 }}
                 src={`${text}`}
-                alt="image_category"
+                alt="avatar"
               />
             )}
           </div>
@@ -232,19 +253,19 @@ export default function Employees() {
       ...getColumnSearchProps("email"),
     },
     {
-      title: "Phone",
+      title: "SĐT",
       dataIndex: "phone_number",
       key: "phone_number",
       ...getColumnSearchProps("phone_number"),
     },
     {
-      title: "Address",
+      title: "Địa chỉ",
       dataIndex: "address",
       key: "address",
       ...getColumnSearchProps("address"),
     },
     {
-      title: "Năm sinh",
+      title: "Ngày sinh",
       dataIndex: "birth_day",
       key: "birth_day",
     },
@@ -252,6 +273,7 @@ export default function Employees() {
       title: "",
       key: "actions",
       render: (record) => {
+        const { password, ...restOfRecord } = record;
         return (
           <div>
             <Space>
@@ -271,7 +293,7 @@ export default function Employees() {
                     "YYYY-MM-DD "
                   );
                   const updatedRecord = {
-                    ...record,
+                    ...restOfRecord,
                     createdAt: formattedCreatedAt,
                     updatedAt: formattedUpdatedAt,
                     birth_day: formattedBirthday,
@@ -343,13 +365,13 @@ export default function Employees() {
       },
     },
     {
-      title: "Name",
+      title: "Tên",
       dataIndex: "full_name",
       key: "full_name",
       ...getColumnSearchProps("full_name"),
     },
     {
-      title: "Chức năng",
+      title: "",
       key: "actions",
       render: (record) => {
         return (
@@ -427,7 +449,7 @@ export default function Employees() {
     const phoneNumberPattern =
       /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/;
     if (value && !phoneNumberPattern.test(value)) {
-      callback("Invalid phone number!");
+      callback("Số điện thoại không hợp lệ!");
     } else {
       callback();
     }
@@ -483,6 +505,49 @@ export default function Employees() {
       component: <Input />,
     },
     {
+      name: "isPassword",
+      label: "Đổi mật khẩu",
+      noStyle: createFormVisible ? true : editFormVisible ? false : true,
+      component: (
+        <Switch
+          style={{
+            display: createFormVisible ? "none" : editFormVisible ? "" : "none",
+          }}
+          onClick={() => {
+            setShowPassword(!showPassword);
+          }}
+        />
+      ),
+    },
+    {
+      name: "password",
+      label: "Mật khẩu",
+      rules: showPassword
+        ? [
+            {
+              required: true,
+              message: "Mật khẩu không được để trống!",
+            },
+            {
+              min: 5,
+              max: 50,
+              message: "Độ dài mật khẩu từ 5-50 kí tự",
+            },
+            {
+              validator: validatePassword,
+            },
+          ]
+        : "",
+      noStyle: createFormVisible ? false : showPassword ? false : true,
+      component: (
+        <Input.Password
+          style={{
+            display: createFormVisible ? "" : showPassword ? "" : "none",
+          }}
+        />
+      ),
+    },
+    {
       name: "phone_number",
       label: "SĐT",
       rules: [
@@ -506,13 +571,59 @@ export default function Employees() {
     },
     {
       name: "birth_day",
-      label: "Năm sinh",
+      label: "Ngày sinh",
       rules: [
         {
           required: false,
         },
       ],
       component: <DatePicker format={"YYYY/MM/DD - HH:mm:ss"} />,
+    },
+    {
+      name: "active",
+      label: "Trạng thái",
+      noStyle: createFormVisible ? true : editFormVisible ? false : true,
+      component: (
+        <Select
+          style={{
+            display: createFormVisible ? "none" : editFormVisible ? "" : "none",
+          }}
+          allowClear
+          options={[
+            {
+              value: "true",
+              label: "Kích hoạt",
+            },
+            {
+              value: "false",
+              label: "Thu hồi",
+            },
+          ]}
+        />
+      ),
+    },
+    {
+      name: "roles",
+      label: "Quyền",
+      component: (
+        <Select
+          allowClear
+          options={[
+            {
+              value: "sales",
+              label: "Nhân viên bán hàng",
+            },
+            {
+              value: "shipper",
+              label: "Nhân viên vận chuyển",
+            },
+            {
+              value: "admin",
+              label: "Quản trị viên",
+            },
+          ]}
+        />
+      ),
     },
     {
       name: "createdAt",
@@ -576,7 +687,6 @@ export default function Employees() {
       .catch((err) => {
         message.error("Thêm mới thất bại!");
         message.error(err.response.data.msg);
-        message.error(err.response.data);
         console.log(err);
       });
     console.log("👌👌👌", values);
@@ -584,9 +694,11 @@ export default function Employees() {
   const onFinishFailed = (errors: object) => {
     console.log("💣💣💣 ", errors);
   };
-  const onUpdateFinish = (values: any) => {
-    axiosClient
-      .patch("/employees/" + selectedRecord._id, values, {
+  const onUpdateFinish = async (values: any) => {
+    const { password, ...restOfValues } = values;
+    let valuesUpdated = password === undefined ? { ...restOfValues } : values;
+    await axiosClient
+      .patch("/employees/" + selectedRecord._id, valuesUpdated, {
         headers: {
           access_token: `Bearer ${window.localStorage.getItem("access_token")}`,
         },
@@ -625,7 +737,7 @@ export default function Employees() {
   };
   return (
     <div>
-      <h1>Employees List</h1>
+      <h1>Danh sách nhân viên</h1>
       <div
         style={{
           display: "flex",
@@ -697,6 +809,7 @@ export default function Employees() {
       </Modal>
       <Table rowKey={"_id"} dataSource={employees} columns={columns} />
       <Modal
+        width={"50%"}
         open={editFormDelete}
         onCancel={() => {
           setEditFormDelete(false);

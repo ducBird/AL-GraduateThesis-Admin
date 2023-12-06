@@ -118,7 +118,7 @@ export default function Categories() {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Nhập thông tin tìm kiếm`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -138,14 +138,14 @@ export default function Categories() {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Làm mới
           </Button>
           <Button
             type="link"
@@ -156,7 +156,7 @@ export default function Categories() {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -165,7 +165,7 @@ export default function Categories() {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -534,7 +534,7 @@ export default function Categories() {
   };
   return (
     <div>
-      <h1>Category List</h1>
+      <h1>Danh sách danh mục sản phẩm</h1>
       <div
         style={{
           display: "flex",
@@ -606,6 +606,7 @@ export default function Categories() {
       </Modal>
       <Table rowKey={"_id"} dataSource={categories} columns={columns} />
       <Modal
+        width={"50%"}
         open={editFormDelete}
         onCancel={() => {
           setEditFormDelete(false);

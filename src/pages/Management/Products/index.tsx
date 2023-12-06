@@ -195,7 +195,7 @@ export default function Products() {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Nhập thông tin tìm kiếm`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -215,14 +215,14 @@ export default function Products() {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Làm mới
           </Button>
           <Button
             type="link"
@@ -233,7 +233,7 @@ export default function Products() {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -242,7 +242,7 @@ export default function Products() {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -945,7 +945,7 @@ export default function Products() {
 
   return (
     <div>
-      <h1>Product List</h1>
+      <h1>Danh sách sản phẩm</h1>
       <div
         style={{
           display: "flex",
@@ -1124,6 +1124,7 @@ export default function Products() {
       </Modal>
       <Table rowKey={"_id"} dataSource={dataSource} columns={columns} />
       <Modal
+        width={"50%"}
         open={editFormDelete}
         onCancel={() => {
           setEditFormDelete(false);

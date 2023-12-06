@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import numeral from "numeral";
 import moment from "moment";
 import {
@@ -16,6 +16,7 @@ import {
   Popconfirm,
   DatePicker,
   Tag,
+  InputRef,
 } from "antd";
 import {
   CheckCircleFilled,
@@ -30,12 +31,17 @@ import {
   LoginOutlined,
   PlayCircleOutlined,
   RollbackOutlined,
+  SearchOutlined,
   SelectOutlined,
 } from "@ant-design/icons";
 import { axiosClient } from "../../../libraries/axiosClient";
 import { IProduct } from "../../../interfaces/Product";
 import { IEmployees } from "../../../interfaces/Employees";
 import TextArea from "antd/es/input/TextArea";
+import { FilterConfirmProps } from "antd/es/table/interface";
+import type { ColumnType } from "antd/es/table";
+import { IOrders } from "../../../interfaces/IOrders";
+import Highlighter from "react-highlight-words";
 
 export default function Orders() {
   const [editFormVisible, setEditFormVisible] = React.useState(false);
@@ -66,6 +72,11 @@ export default function Orders() {
   const [createFormVisible, setCreateFormVisible] = React.useState(false);
   const [openModalOrderDetails, setOpenModalDetails] = React.useState(false);
   // const [loading, setLoading] = React.useState(false);
+  //State search
+  type DataIndex = keyof IOrders;
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const searchInput = useRef<InputRef>(null);
   // Products
   const [products, setProducts] = React.useState<IProduct[]>([]);
   React.useEffect(() => {
@@ -165,6 +176,111 @@ export default function Orders() {
   // ĐANG TRẢ HÀNG || RETURNING
   // ĐÃ TRẢ || RETURNED
 
+  //Search
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: (param?: FilterConfirmProps) => void,
+    dataIndex: DataIndex
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+
+  const handleReset = (clearFilters: () => void) => {
+    clearFilters();
+    setSearchText("");
+  };
+  //search
+  const getColumnSearchProps = (dataIndex: DataIndex): ColumnType<IOrders> => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Nhập thông tin tìm kiếm`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() =>
+            handleSearch(selectedKeys as string[], confirm, dataIndex)
+          }
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() =>
+              handleSearch(selectedKeys as string[], confirm, dataIndex)
+            }
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Tìm kiếm
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Làm mới
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({ closeDropdown: false });
+              setSearchText((selectedKeys as string[])[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Lọc
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            Đóng
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+    ),
+    onFilter: (value, record: any) =>
+      record[dataIndex]
+        .toString()
+        .toLowerCase()
+        .includes((value as string).toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ) : (
+        text
+      ),
+  });
+
   const productColumns = [
     {
       title: "Số lượng",
@@ -250,6 +366,7 @@ export default function Orders() {
       title: "Khách hàng",
       dataIndex: "full_name",
       key: "full_name",
+      ...getColumnSearchProps("full_name"),
       render: (text: string) => {
         return <p>{text}</p>;
       },
@@ -258,6 +375,7 @@ export default function Orders() {
       title: "Số điện thoại",
       dataIndex: "phoneNumber",
       key: "phoneNumber",
+      ...getColumnSearchProps("phoneNumber"),
       render: (text: number) => {
         return <p>{text}</p>;
       },
@@ -266,11 +384,32 @@ export default function Orders() {
       title: "Hình thức thanh toán",
       dataIndex: "payment_information",
       key: "payment_information",
+      ...getColumnSearchProps("payment_information"),
     },
     {
       title: "Vận chuyển",
       dataIndex: "status",
       key: "status",
+      filters: [
+        {
+          text: "Chờ xác nhận",
+          value: "WAIT FOR CONFIRMATION",
+        },
+        {
+          text: "Chờ lấy hàng",
+          value: "WAITING FOR PICKUP",
+        },
+        {
+          text: "Đang giao",
+          value: "DELIVERING",
+        },
+        {
+          text: "Đã giao",
+          value: "DELIVERED",
+        },
+      ],
+      onFilter: (value: string, record: any) =>
+        record.status.indexOf(value) === 0,
       render: (text: string) => {
         return renderStatus(text);
       },
@@ -279,6 +418,18 @@ export default function Orders() {
       title: "Thanh toán",
       dataIndex: "payment_status",
       key: "payment_status",
+      filters: [
+        {
+          text: "Đã thanh toán",
+          value: true,
+        },
+        {
+          text: "Chưa thanh toán",
+          value: false,
+        },
+      ],
+      onFilter: (value: boolean, record: any) =>
+        record.payment_status === value,
       render: (text: boolean) => {
         return (
           <p style={{ textAlign: "center" }}>
@@ -785,6 +936,14 @@ export default function Orders() {
         }}
         okText="Lưu thông tin"
         cancelText="Đóng"
+        okButtonProps={{
+          disabled:
+            selectedRecord?.status !== "WAIT FOR CONFIRMATION" ? true : false,
+          style: {
+            display:
+              selectedRecord?.status !== "WAIT FOR CONFIRMATION" ? "none" : "",
+          },
+        }}
       >
         <Form
           form={updateForm}
