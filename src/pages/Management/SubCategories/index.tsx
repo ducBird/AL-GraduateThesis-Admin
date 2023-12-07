@@ -541,7 +541,7 @@ export default function SubCategories() {
 
   return (
     <div>
-      <h1>SubCategory List</h1>
+      <h1>Danh sách danh mục con</h1>
       <div
         style={{
           display: "flex",

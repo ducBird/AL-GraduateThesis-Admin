@@ -168,7 +168,7 @@ export default function VariantModal(props: IProps) {
                 icon={<EditOutlined />}
               ></Button>
               {/* Button Delete */}
-              <Popconfirm
+              {/* <Popconfirm
                 icon={<QuestionCircleOutlined style={{ color: "red" }} />}
                 title="Bạn có chắc chắn muốn xóa?"
                 onConfirm={() => {
@@ -178,7 +178,7 @@ export default function VariantModal(props: IProps) {
                 cancelText="Không"
               >
                 <Button danger icon={<DeleteOutlined />}></Button>
-              </Popconfirm>
+              </Popconfirm> */}
             </Space>
           </div>
         );

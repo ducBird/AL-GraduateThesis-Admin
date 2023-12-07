@@ -938,10 +938,16 @@ export default function Orders() {
         cancelText="Đóng"
         okButtonProps={{
           disabled:
-            selectedRecord?.status !== "WAIT FOR CONFIRMATION" ? true : false,
+            selectedRecord?.status !== "WAIT FOR CONFIRMATION" &&
+            selectedRecord?.employee_id
+              ? true
+              : false,
           style: {
             display:
-              selectedRecord?.status !== "WAIT FOR CONFIRMATION" ? "none" : "",
+              selectedRecord?.status !== "WAIT FOR CONFIRMATION" &&
+              selectedRecord?.employee_id
+                ? "none"
+                : "",
           },
         }}
       >

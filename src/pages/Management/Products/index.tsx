@@ -25,10 +25,12 @@ import {
   QuestionCircleOutlined,
   SearchOutlined,
   MinusCircleOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
 } from "@ant-design/icons";
 import type { ColumnType, ColumnsType } from "antd/es/table";
 import { columnProducts } from "./columnProducts";
-import { addedAttribute } from "../../../utils/AddAttributeToColumns";
+// import { addedAttribute } from "../../../utils/AddAttributeToColumns";
 import style from "./products.module.css";
 import CustomForm from "../../../components/common/CustomForm";
 import moment from "moment";
@@ -332,6 +334,33 @@ export default function Products() {
       },
     },
     {
+      title: "Biến thể",
+      dataIndex: "is_variant",
+      key: "is_variant",
+      filters: [
+        {
+          text: "Có biến thể",
+          value: true,
+        },
+        {
+          text: "Không biến thể",
+          value: false,
+        },
+      ],
+      onFilter: (value: boolean, record: any) => record.is_variant === value,
+      render: (text: boolean) => {
+        return (
+          <p style={{ textAlign: "center" }}>
+            {text ? (
+              <CheckCircleFilled style={{ color: "green" }} />
+            ) : (
+              <CloseCircleFilled style={{ color: "red" }} />
+            )}
+          </p>
+        );
+      },
+    },
+    {
       title: "",
       key: "actions",
       render: (record) => {
@@ -339,28 +368,36 @@ export default function Products() {
           <div>
             <Space>
               {/* Button Variant */}
-              <Button
-                type="primary"
-                onClick={() => {
-                  setOpenModalAttribute(true);
-                  setSelectedRecord(record);
-                  attributeForm.setFieldsValue(record);
-                  console.log(record);
-                }}
-              >
-                Thuộc tính
-              </Button>
+              {record.is_variant ? (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setOpenModalAttribute(true);
+                    setSelectedRecord(record);
+                    attributeForm.setFieldsValue(record);
+                    console.log(record);
+                  }}
+                >
+                  Thuộc tính
+                </Button>
+              ) : (
+                ""
+              )}
               {/* Button Variant */}
-              <Button
-                type="primary"
-                onClick={() => {
-                  setOpenVariant(true);
-                  // console.log(record);
-                  setProductVariants(record);
-                }}
-              >
-                Biến thể
-              </Button>
+              {record.is_variant ? (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setOpenVariant(true);
+                    // console.log(record);
+                    setProductVariants(record);
+                  }}
+                >
+                  Biến thể
+                </Button>
+              ) : (
+                ""
+              )}
               {/* Button Edit */}
               <Button
                 onClick={() => {

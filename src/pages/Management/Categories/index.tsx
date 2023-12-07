@@ -23,7 +23,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { columnCategories } from "./columnCategories";
-import { addedAttribute } from "../../../utils/AddAttributeToColumns";
+// import { addedAttribute } from "../../../utils/AddAttributeToColumns";
 import axios from "axios";
 import CustomForm from "../../../components/common/CustomForm";
 import style from "./categories.module.css";

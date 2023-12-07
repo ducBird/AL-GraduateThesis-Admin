@@ -273,7 +273,7 @@ export default function Employees() {
       title: "",
       key: "actions",
       render: (record) => {
-        const { password, ...restOfRecord } = record;
+        const { password, birth_day, ...restOfRecord } = record;
         return (
           <div>
             <Space>
@@ -288,15 +288,15 @@ export default function Employees() {
                     record.updatedAt,
                     "YYYY-MM-DD HH:mm:ss"
                   );
-                  const formattedBirthday = moment(
-                    record.birth_day,
-                    "YYYY-MM-DD "
-                  );
+                  // const formattedBirthday = moment(
+                  //   record.birth_day,
+                  //   "YYYY-MM-DD HH:mm:ss"
+                  // );
                   const updatedRecord = {
                     ...restOfRecord,
                     createdAt: formattedCreatedAt,
                     updatedAt: formattedUpdatedAt,
-                    birth_day: formattedBirthday,
+                    // birth_day: formattedBirthday,
                   };
                   setSelectedRecord(updatedRecord);
                   updateForm.setFieldsValue(updatedRecord);
