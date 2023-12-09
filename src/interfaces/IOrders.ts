@@ -4,6 +4,7 @@ export interface IOrders {
   _id?: object;
   first_name?: string;
   last_name?: string;
+  full_name?: string;
   phoneNumber?: string;
   status?: string;
   shipping_address?: string;

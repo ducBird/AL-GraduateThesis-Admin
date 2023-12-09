@@ -120,7 +120,7 @@ export default function Customers() {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Nhập thông tin tìm kiếm`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -140,14 +140,14 @@ export default function Customers() {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Làm mới
           </Button>
           <Button
             type="link"
@@ -158,7 +158,7 @@ export default function Customers() {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -167,7 +167,7 @@ export default function Customers() {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -199,7 +199,7 @@ export default function Customers() {
   });
   const columns: ColumnsType<ICustomer> = [
     {
-      title: "Name",
+      title: "Tên",
       dataIndex: "full_name",
       key: "full_name",
       ...getColumnSearchProps("full_name"),
@@ -213,9 +213,9 @@ export default function Customers() {
           <div style={{ textAlign: "center" }}>
             {text && (
               <img
-                style={{ maxWidth: 150, width: "40%", minWidth: 70 }}
+                style={{ maxWidth: 150, width: "10%", minWidth: 30 }}
                 src={`${text}`}
-                alt="image_category"
+                alt="avatar"
               />
             )}
           </div>
@@ -229,19 +229,19 @@ export default function Customers() {
       ...getColumnSearchProps("email"),
     },
     {
-      title: "Phone",
+      title: "SĐT",
       dataIndex: "phone_number",
       key: "phone_number",
       ...getColumnSearchProps("phone_number"),
     },
     {
-      title: "Address",
+      title: "Địa chỉ",
       dataIndex: "address",
       key: "address",
       ...getColumnSearchProps("address"),
     },
     {
-      title: "Năm sinh",
+      title: "Ngày sinh",
       dataIndex: "birth_day",
       key: "birth_day",
     },
@@ -329,7 +329,7 @@ export default function Customers() {
     const phoneNumberPattern =
       /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/;
     if (value && !phoneNumberPattern.test(value)) {
-      callback("Invalid phone number!");
+      callback("Số điện thoại không hợp lệ!");
     } else {
       callback();
     }
@@ -408,7 +408,7 @@ export default function Customers() {
     },
     {
       name: "birth_day",
-      label: "Năm sinh",
+      label: "Ngày sinh",
       rules: [
         {
           required: false,
@@ -622,7 +622,7 @@ export default function Customers() {
   };
   return (
     <div>
-      <h1>Customers List</h1>
+      <h1>Danh sách khách hàng</h1>
       <div
         style={{
           display: "flex",
@@ -695,6 +695,7 @@ export default function Customers() {
       <Table rowKey={"_id"} dataSource={customers} columns={columns} />
 
       <Modal
+        width={"50%"}
         open={editFormDelete}
         onCancel={() => {
           setEditFormDelete(false);

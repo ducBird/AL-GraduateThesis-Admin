@@ -121,7 +121,7 @@ export default function SubCategories() {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Nhập thông tin tìm kiếm`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -141,14 +141,14 @@ export default function SubCategories() {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Làm mới
           </Button>
           <Button
             type="link"
@@ -159,7 +159,7 @@ export default function SubCategories() {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -168,7 +168,7 @@ export default function SubCategories() {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -541,7 +541,7 @@ export default function SubCategories() {
 
   return (
     <div>
-      <h1>SubCategory List</h1>
+      <h1>Danh sách danh mục con</h1>
       <div
         style={{
           display: "flex",
@@ -611,6 +611,7 @@ export default function SubCategories() {
       </Modal>
       <Table rowKey={"_id"} dataSource={dataSource} columns={columns} />
       <Modal
+        width={"50%"}
         open={editFormDelete}
         onCancel={() => {
           setEditFormDelete(false);

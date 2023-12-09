@@ -25,10 +25,12 @@ import {
   QuestionCircleOutlined,
   SearchOutlined,
   MinusCircleOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
 } from "@ant-design/icons";
 import type { ColumnType, ColumnsType } from "antd/es/table";
 import { columnProducts } from "./columnProducts";
-import { addedAttribute } from "../../../utils/AddAttributeToColumns";
+// import { addedAttribute } from "../../../utils/AddAttributeToColumns";
 import style from "./products.module.css";
 import CustomForm from "../../../components/common/CustomForm";
 import moment from "moment";
@@ -195,7 +197,7 @@ export default function Products() {
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Nhập thông tin tìm kiếm`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -215,14 +217,14 @@ export default function Products() {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Làm mới
           </Button>
           <Button
             type="link"
@@ -233,7 +235,7 @@ export default function Products() {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            Lọc
           </Button>
           <Button
             type="link"
@@ -242,7 +244,7 @@ export default function Products() {
               close();
             }}
           >
-            close
+            Đóng
           </Button>
         </Space>
       </div>
@@ -332,6 +334,33 @@ export default function Products() {
       },
     },
     {
+      title: "Biến thể",
+      dataIndex: "is_variant",
+      key: "is_variant",
+      filters: [
+        {
+          text: "Có biến thể",
+          value: true,
+        },
+        {
+          text: "Không biến thể",
+          value: false,
+        },
+      ],
+      onFilter: (value: boolean, record: any) => record.is_variant === value,
+      render: (text: boolean) => {
+        return (
+          <p style={{ textAlign: "center" }}>
+            {text ? (
+              <CheckCircleFilled style={{ color: "green" }} />
+            ) : (
+              <CloseCircleFilled style={{ color: "red" }} />
+            )}
+          </p>
+        );
+      },
+    },
+    {
       title: "",
       key: "actions",
       render: (record) => {
@@ -339,28 +368,36 @@ export default function Products() {
           <div>
             <Space>
               {/* Button Variant */}
-              <Button
-                type="primary"
-                onClick={() => {
-                  setOpenModalAttribute(true);
-                  setSelectedRecord(record);
-                  attributeForm.setFieldsValue(record);
-                  console.log(record);
-                }}
-              >
-                Thuộc tính
-              </Button>
+              {record.is_variant ? (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setOpenModalAttribute(true);
+                    setSelectedRecord(record);
+                    attributeForm.setFieldsValue(record);
+                    console.log(record);
+                  }}
+                >
+                  Thuộc tính
+                </Button>
+              ) : (
+                ""
+              )}
               {/* Button Variant */}
-              <Button
-                type="primary"
-                onClick={() => {
-                  setOpenVariant(true);
-                  // console.log(record);
-                  setProductVariants(record);
-                }}
-              >
-                Biến thể
-              </Button>
+              {record.is_variant ? (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setOpenVariant(true);
+                    // console.log(record);
+                    setProductVariants(record);
+                  }}
+                >
+                  Biến thể
+                </Button>
+              ) : (
+                ""
+              )}
               {/* Button Edit */}
               <Button
                 onClick={() => {
@@ -945,7 +982,7 @@ export default function Products() {
 
   return (
     <div>
-      <h1>Product List</h1>
+      <h1>Danh sách sản phẩm</h1>
       <div
         style={{
           display: "flex",
@@ -1124,6 +1161,7 @@ export default function Products() {
       </Modal>
       <Table rowKey={"_id"} dataSource={dataSource} columns={columns} />
       <Modal
+        width={"50%"}
         open={editFormDelete}
         onCancel={() => {
           setEditFormDelete(false);
