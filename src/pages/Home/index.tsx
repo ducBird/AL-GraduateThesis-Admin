@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DatePicker } from "antd";
+import { DatePicker, message } from "antd";
 import style from "./home.module.css";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -43,7 +43,7 @@ export default function HomePage() {
     const changeStartDate = today.subtract(2, "months");
     // Kiểm tra nếu khoảng cách giữa startDate và endDate vượt quá 2 tháng
     if (dayjs(dateString).add(2, "months").isBefore(today)) {
-      alert(
+      message.error(
         "Khoảng thời gian cho phép xuất dữ liệu giao dịch tối đa là 2 tháng"
       );
       setStartDate(changeStartDate.format(dateFormat));
