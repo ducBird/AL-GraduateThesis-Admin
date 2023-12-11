@@ -27,13 +27,20 @@ export default function Login() {
     axiosClient
       .post("/employees/login", values)
       .then((response) => {
-        addUser(response.data);
-        window.localStorage.setItem(
-          "refresh_token",
-          response.data.refresh_token
-        );
-        window.localStorage.setItem("access_token", response.data.access_token);
-        message.success(response.data.msg);
+        if (!response.data.user.active) {
+          message.error("Tài khoản đã bị khóa!");
+        } else {
+          addUser(response.data);
+          window.localStorage.setItem(
+            "refresh_token",
+            response.data.refresh_token
+          );
+          window.localStorage.setItem(
+            "access_token",
+            response.data.access_token
+          );
+          message.success(response.data.msg);
+        }
       })
       .catch((err) => {
         message.error(err.response.data.msg);

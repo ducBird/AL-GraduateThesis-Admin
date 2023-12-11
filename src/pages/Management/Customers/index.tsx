@@ -7,7 +7,9 @@ import {
   InputRef,
   Modal,
   Popconfirm,
+  Select,
   Space,
+  Switch,
   Table,
   Upload,
   message,
@@ -18,6 +20,8 @@ import { axiosClient } from "../../../libraries/axiosClient";
 import CustomForm from "../../../components/common/CustomForm";
 import axios from "axios";
 import {
+  CheckCircleFilled,
+  CloseCircleFilled,
   DeleteOutlined,
   EditOutlined,
   QuestionCircleOutlined,
@@ -40,6 +44,7 @@ export default function Customers() {
   const [selectedRecord, setSelectedRecord] = useState<ICustomer>({});
   const [createFormVisible, setCreateFormVisible] = useState(false);
   const [editFormDelete, setEditFormDelete] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   // File
   const [file, setFile] = useState<any>();
   //State search
@@ -54,6 +59,23 @@ export default function Customers() {
   const { users } = useUser((state) => state) as any;
   const userString = localStorage.getItem("user-storage");
   const user = userString ? JSON.parse(userString) : null;
+
+  // Tạo một hàm để kiểm tra mật khẩu có đáp ứng các tiêu chí bảo mật cao hay không
+  const validatePassword = (rule, value, callback) => {
+    // Tạo một regex để kiểm tra mật khẩu có chứa ít nhất một chữ cái hoa, một chữ cái thường, một số và một ký tự đặc biệt
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).+$/;
+
+    // Nếu mật khẩu không khớp với regex, gọi callback với thông báo lỗi
+    if (!passwordRegex.test(value)) {
+      callback(
+        "Mật khẩu phải có ít nhất một chữ cái hoa, một chữ cái thường, một số và một ký tự đặc biệt!"
+      );
+    } else {
+      // Nếu mật khẩu khớp với regex, gọi callback với tham số trống
+      callback();
+    }
+  };
+
   useEffect(() => {
     axiosClient
       .get("/customers", {
@@ -246,9 +268,37 @@ export default function Customers() {
       key: "birth_day",
     },
     {
+      title: "Trạng thái",
+      dataIndex: "active",
+      key: "active",
+      filters: [
+        {
+          text: "Kích hoạt",
+          value: true,
+        },
+        {
+          text: "Thu hồi",
+          value: false,
+        },
+      ],
+      onFilter: (value: boolean, record: any) => record.active === value,
+      render: (text: boolean) => {
+        return (
+          <p style={{ textAlign: "center" }}>
+            {text ? (
+              <CheckCircleFilled style={{ color: "green" }} />
+            ) : (
+              <CloseCircleFilled style={{ color: "red" }} />
+            )}
+          </p>
+        );
+      },
+    },
+    {
       title: "",
       key: "actions",
       render: (record) => {
+        const { password, birth_day, ...restOfRecord } = record;
         return (
           <div>
             <Space>
@@ -268,7 +318,7 @@ export default function Customers() {
                     "YYYY-MM-DD "
                   );
                   const updatedRecord = {
-                    ...record,
+                    ...restOfRecord,
                     createdAt: formattedCreatedAt,
                     updatedAt: formattedUpdatedAt,
                     birth_day: formattedBirthday,
@@ -385,6 +435,64 @@ export default function Customers() {
       component: <Input />,
     },
     {
+      name: "isPassword",
+      label: "Đổi mật khẩu",
+      noStyle: createFormVisible ? true : editFormVisible ? false : true,
+      component: (
+        <Switch
+          style={{
+            display: createFormVisible ? "none" : editFormVisible ? "" : "none",
+          }}
+          onClick={() => {
+            setShowPassword(!showPassword);
+          }}
+        />
+      ),
+    },
+    {
+      name: "password",
+      label: "Mật khẩu",
+      rules: showPassword
+        ? [
+            {
+              required: true,
+              message: "Mật khẩu không được để trống!",
+            },
+            {
+              min: 5,
+              max: 50,
+              message: "Độ dài mật khẩu từ 5-50 kí tự",
+            },
+            {
+              validator: validatePassword,
+            },
+          ]
+        : createFormVisible
+        ? [
+            {
+              required: true,
+              message: "Mật khẩu không được để trống!",
+            },
+            {
+              min: 5,
+              max: 50,
+              message: "Độ dài mật khẩu từ 5-50 kí tự",
+            },
+            {
+              validator: validatePassword,
+            },
+          ]
+        : "",
+      noStyle: createFormVisible ? false : showPassword ? false : true,
+      component: (
+        <Input.Password
+          style={{
+            display: createFormVisible ? "" : showPassword ? "" : "none",
+          }}
+        />
+      ),
+    },
+    {
       name: "phone_number",
       label: "SĐT",
       rules: [
@@ -415,6 +523,29 @@ export default function Customers() {
         },
       ],
       component: <DatePicker format={"YYYY/MM/DD - HH:mm:ss"} />,
+    },
+    {
+      name: "active",
+      label: "Trạng thái",
+      noStyle: createFormVisible ? true : editFormVisible ? false : true,
+      component: (
+        <Select
+          style={{
+            display: createFormVisible ? "none" : editFormVisible ? "" : "none",
+          }}
+          allowClear
+          options={[
+            {
+              value: "true",
+              label: "Kích hoạt",
+            },
+            {
+              value: "false",
+              label: "Thu hồi",
+            },
+          ]}
+        />
+      ),
     },
     {
       name: "createdAt",
@@ -582,9 +713,11 @@ export default function Customers() {
   const onFinishFailed = (errors: object) => {
     console.log("💣💣💣 ", errors);
   };
-  const onUpdateFinish = (values: any) => {
-    axiosClient
-      .patch("/customers/" + selectedRecord._id, values, {
+  const onUpdateFinish = async (values: any) => {
+    const { password, ...restOfValues } = values;
+    let valuesUpdated = password === undefined ? { ...restOfValues } : values;
+    await axiosClient
+      .patch("/customers/" + selectedRecord._id, valuesUpdated, {
         headers: {
           access_token: `Bearer ${window.localStorage.getItem("access_token")}`,
         },
@@ -607,6 +740,7 @@ export default function Customers() {
             });
         }
         updateForm.resetFields();
+        setShowPassword(false);
         setEditFormVisible(false);
         setRefresh((f) => f + 1);
         message.success("Cập nhật thành công!");

@@ -466,22 +466,22 @@ export default function Orders() {
         return <strong>{numeral(text).format("0,0$")}</strong>;
       },
     },
-    {
-      title: "",
-      key: "actions",
-      render: (record: any) => {
-        return (
-          <Button
-            onClick={() => {
-              setSelectedOrder(record);
-              setOpenModalDetails(true);
-            }}
-          >
-            Xem
-          </Button>
-        );
-      },
-    },
+    // {
+    //   title: "",
+    //   key: "actions",
+    //   render: (record: any) => {
+    //     return (
+    //       <Button
+    //         onClick={() => {
+    //           setSelectedOrder(record);
+    //           setOpenModalDetails(true);
+    //         }}
+    //       >
+    //         Xem
+    //       </Button>
+    //     );
+    //   },
+    // },
     // delete, update
     {
       title: "",
@@ -502,7 +502,7 @@ export default function Orders() {
               }}
             />
             {/* delete */}
-            <Popconfirm
+            {/* <Popconfirm
               title="Bạn có muốn hủy đơn hàng không?"
               onConfirm={() => {
                 //delete
@@ -522,7 +522,7 @@ export default function Orders() {
               cancelText="Không"
             >
               <Button danger icon={<DeleteOutlined />} />
-            </Popconfirm>
+            </Popconfirm> */}
           </Space>
         );
       },

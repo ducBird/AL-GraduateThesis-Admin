@@ -44,16 +44,6 @@ export default function SiderMenu() {
           key: "management-products",
           icon: <AiOutlineShopping />,
         },
-        {
-          label: "Khách hàng",
-          key: "management-customers",
-          icon: <MdOutlinePeopleAlt />,
-        },
-        {
-          label: "Nhân viên",
-          key: "management-employees",
-          icon: <MdOutlineSupportAgent />,
-        },
         { label: "Đơn hàng", key: "sales-orders", icon: <MdOutlineArticle /> },
 
         {
@@ -66,11 +56,6 @@ export default function SiderMenu() {
           key: "management-vouchers",
           icon: <AiOutlineShopping />,
         },
-        // {
-        //   label: "Nhà cung cấp",
-        //   key: "management-suppliers",
-        //   icon: <RiLuggageDepositLine />,
-        // },
       ],
     },
     {
@@ -124,29 +109,6 @@ export default function SiderMenu() {
         },
       ],
     },
-    {
-      label: "Quản lý vận chuyển",
-      key: "shipping",
-      icon: <FaShippingFast />,
-      children: [
-        { label: "Đơn mua", key: "shipping-purchase" },
-        {
-          label: "Đơn trả",
-          key: "shipping-return",
-        },
-      ],
-    },
-    // {
-    //   label: "Quản lý kho",
-    //   key: "warehouse",
-    //   icon: <FaWarehouse />,
-    //   children: [
-    //     {
-    //       label: "Đơn hàng đang đợi vận chuyển",
-    //       key: "warehouse-shipping",
-    //     },
-    //   ],
-    // },
     { label: "Cài Đặt", key: "settings", icon: <AiOutlineSetting /> }, // which is required
   ];
   const itemsSiderShipper = [
@@ -163,23 +125,37 @@ export default function SiderMenu() {
       ],
     },
   ];
-  const itemsSiderWarehouse = [
+  const itemsSiderAdmin = [
+    { label: "Trang Chủ", key: "home", icon: <AiOutlineHome /> }, // remember to pass the key prop
     {
-      label: "Quản lý kho",
-      key: "warehouse",
-      icon: <FaWarehouse />,
+      label: "Quản Trị",
+      key: "management",
+      icon: <MdOutlineManageAccounts />,
       children: [
         {
-          label: "Đơn hàng vận chuyển",
-          key: "warehouse-shipping",
+          label: "Khách hàng",
+          key: "management-customers",
+          icon: <MdOutlinePeopleAlt />,
+        },
+        {
+          label: "Nhân viên",
+          key: "management-employees",
+          icon: <MdOutlineSupportAgent />,
         },
       ],
     },
+    { label: "Cài Đặt", key: "settings", icon: <AiOutlineSetting /> }, // which is required
   ];
   return (
     <div>
       <Menu
-        items={users.user.roles === "admin" ? itemsSider : itemsSiderShipper}
+        items={
+          users.user.roles === "admin"
+            ? itemsSiderAdmin
+            : users.user.roles === "sales"
+            ? itemsSider
+            : itemsSiderShipper
+        }
         mode="inline"
         onClick={({ item, key }) => {
           navigate("/" + key.split("-").join("/")); //

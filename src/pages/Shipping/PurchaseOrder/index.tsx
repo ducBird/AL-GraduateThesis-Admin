@@ -447,22 +447,22 @@ export default function PurchaseOrder() {
         return <strong>{numeral(text).format("0,0$")}</strong>;
       },
     },
-    {
-      title: "",
-      key: "actions",
-      render: (record: any) => {
-        return (
-          <Button
-            onClick={() => {
-              setSelectedOrder(record);
-              setOpenModalDetails(true);
-            }}
-          >
-            Xem
-          </Button>
-        );
-      },
-    },
+    // {
+    //   title: "",
+    //   key: "actions",
+    //   render: (record: any) => {
+    //     return (
+    //       <Button
+    //         onClick={() => {
+    //           setSelectedOrder(record);
+    //           setOpenModalDetails(true);
+    //         }}
+    //       >
+    //         Xem
+    //       </Button>
+    //     );
+    //   },
+    // },
     // delete, update
     {
       title: "",
@@ -542,7 +542,7 @@ export default function PurchaseOrder() {
                   axiosClient
                     .patch("/orders/" + id, {
                       employee_id: null,
-                      status: "WAIT FOR CONFIRMATION",
+                      status: "WAITING FOR PICKUP",
                     })
                     .then((response) => {
                       message.success("Hủy đơn hàng thành công!");
@@ -655,22 +655,22 @@ export default function PurchaseOrder() {
         return <strong>{numeral(text).format("0,0$")}</strong>;
       },
     },
-    {
-      title: "",
-      key: "actions",
-      render: (record: any) => {
-        return (
-          <Button
-            onClick={() => {
-              setOpenModalDetails(true);
-              setSelectedOrder(record);
-            }}
-          >
-            Xem
-          </Button>
-        );
-      },
-    },
+    // {
+    //   title: "",
+    //   key: "actions",
+    //   render: (record: any) => {
+    //     return (
+    //       <Button
+    //         onClick={() => {
+    //           setOpenModalDetails(true);
+    //           setSelectedOrder(record);
+    //         }}
+    //       >
+    //         Xem
+    //       </Button>
+    //     );
+    //   },
+    // },
     {
       title: "",
       key: "actions",
@@ -813,22 +813,22 @@ export default function PurchaseOrder() {
         return <strong>{numeral(text).format("0,0$")}</strong>;
       },
     },
-    {
-      title: "",
-      key: "actions",
-      render: (record: any) => {
-        return (
-          <Button
-            onClick={() => {
-              setOpenModalDetails(true);
-              setSelectedOrder(record);
-            }}
-          >
-            Xem
-          </Button>
-        );
-      },
-    },
+    // {
+    //   title: "",
+    //   key: "actions",
+    //   render: (record: any) => {
+    //     return (
+    //       <Button
+    //         onClick={() => {
+    //           setOpenModalDetails(true);
+    //           setSelectedOrder(record);
+    //         }}
+    //       >
+    //         Xem
+    //       </Button>
+    //     );
+    //   },
+    // },
     {
       title: "",
       key: "actions",
