@@ -484,22 +484,22 @@ export default function Orders() {
         return <strong>{numeral(text).format("0,0$")}</strong>;
       },
     },
-    // {
-    //   title: "",
-    //   key: "actions",
-    //   render: (record: any) => {
-    //     return (
-    //       <Button
-    //         onClick={() => {
-    //           setSelectedOrder(record);
-    //           setOpenModalDetails(true);
-    //         }}
-    //       >
-    //         Xem
-    //       </Button>
-    //     );
-    //   },
-    // },
+    {
+      title: "",
+      key: "actions",
+      render: (record: any) => {
+        return (
+          <Button
+            onClick={() => {
+              setSelectedOrder(record);
+              setOpenModalDetails(true);
+            }}
+          >
+            Xem
+          </Button>
+        );
+      },
+    },
     // delete, update
     {
       title: "",
