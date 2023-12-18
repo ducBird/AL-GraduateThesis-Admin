@@ -14,6 +14,7 @@ import {
   Space,
   DatePicker,
   InputRef,
+  Switch,
 } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import CustomForm from "../../../components/common/CustomForm";
@@ -28,8 +29,11 @@ export default function Accumulated() {
   const [editFormVisible, setEditFormVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<ICategory>({});
   const [createFormVisible, setCreateFormVisible] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [isUpdateFormActive, setIsUpdateFormActive] = useState(false);
   // File
   const [file, setFile] = useState<any>();
+
   // Form
   const [updateForm] = Form.useForm();
   useEffect(() => {
@@ -68,6 +72,18 @@ export default function Accumulated() {
       key: "updatedAt",
     },
     {
+      title: "Trạng thái",
+      dataIndex: "isActive",
+      key: "isActive",
+      render: (text, record) => {
+        if (text) {
+          return <span style={{ color: "green" }}>Đang hoạt động</span>;
+        } else {
+          return <span style={{ color: "red" }}>Ngừng hoạt động</span>;
+        }
+      },
+    },
+    {
       title: "",
       key: "actions",
       render: (record) => {
@@ -89,8 +105,10 @@ export default function Accumulated() {
                     ...record,
                     createdAt: formattedCreatedAt,
                     updatedAt: formattedUpdatedAt,
+                    isActive: record.isActive,
                   };
                   setSelectedRecord(updatedRecord);
+                  setIsUpdateFormActive(record.isActive);
                   updateForm.setFieldsValue(updatedRecord);
                   setEditFormVisible(true);
                 }}
@@ -105,6 +123,28 @@ export default function Accumulated() {
   // addedAttribute(columnCategories, columns);
   // Handle Form
   const AccumulatedField = [
+    {
+      name: "isActive",
+      label: "Trạng thái",
+      rules: [
+        {
+          required: true,
+          message: "Trạng thái hoạt động không được để trống!",
+        },
+      ],
+      initialValue: false,
+      component: (
+        <Switch
+          style={{ width: "60px" }}
+          checked={isUpdateFormActive}
+          checkedChildren="Bật"
+          unCheckedChildren="Tắt"
+          onChange={() => {
+            setIsUpdateFormActive(!isUpdateFormActive);
+          }}
+        />
+      ),
+    },
     {
       name: "name",
       label: "Tên",

@@ -24,4 +24,5 @@ export interface IProduct {
   updatedAt?: Date;
   variants?: [object];
   attributes?: [object];
+  is_variant?: boolean;
 }

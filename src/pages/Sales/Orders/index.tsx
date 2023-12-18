@@ -79,6 +79,8 @@ export default function Orders() {
   const searchInput = useRef<InputRef>(null);
   // Products
   const [products, setProducts] = React.useState<IProduct[]>([]);
+  console.log(selectedOrder);
+
   React.useEffect(() => {
     axiosClient.get("/products").then((response) => {
       setProducts(response.data);
@@ -292,7 +294,14 @@ export default function Orders() {
       dataIndex: "product.name",
       key: "product.name",
       render: (text, record) => {
-        return <strong>{record?.product?.name}</strong>;
+        console.log("record", record);
+
+        return (
+          <strong>
+            {record?.product?.name} {record?.variants_id !== null ? "-" : ""}{" "}
+            {record?.variants?.title}
+          </strong>
+        );
       },
     },
     {
@@ -300,13 +309,22 @@ export default function Orders() {
       dataIndex: "product.total_money_order",
       key: "product.total_money_order",
       render: (text, record) => {
+        const originalPrice =
+          record?.variants_id !== null
+            ? record?.variants?.price
+            : record?.product?.price;
+
+        const discountedPrice =
+          (originalPrice * (100 - record?.product?.discount)) / 100;
+
         return (
           <div style={{ textAlign: "right" }}>
-            {numeral(
-              record?.product?.discount
-                ? record?.product?.total
-                : record?.product?.price
-            ).format("0,0$")}
+            <div>
+              <span style={{ textDecoration: "line-through" }}>
+                {numeral(originalPrice).format("0,0$")}
+              </span>
+            </div>
+            <div>{numeral(discountedPrice).format("0,0$")}</div>
           </div>
         );
       },
@@ -323,41 +341,41 @@ export default function Orders() {
         );
       },
     },
-    {
-      title: "",
-      key: "actions",
-      render: (text, record) => {
-        return (
-          <Button
-            onClick={async () => {
-              if (selectedOrder !== null) {
-                const currentProduct = record;
-                const response = await axiosClient.get(
-                  "orders/" + selectedOrder._id
-                );
-                const currentOrder = response.data;
-                const { orderDetails } = currentOrder;
-                const remainOrderDetails = orderDetails.filter((x: any) => {
-                  return (
-                    x.productId.toString() !==
-                    currentProduct.productId.toString()
-                  );
-                });
-                await axiosClient.patch("orders/" + selectedOrder._id, {
-                  orderDetails: remainOrderDetails,
-                });
-              }
+    // {
+    //   title: "",
+    //   key: "actions",
+    //   render: (text, record) => {
+    //     return (
+    //       <Button
+    //         onClick={async () => {
+    //           if (selectedOrder !== null) {
+    //             const currentProduct = record;
+    //             const response = await axiosClient.get(
+    //               "orders/" + selectedOrder._id
+    //             );
+    //             const currentOrder = response.data;
+    //             const { orderDetails } = currentOrder;
+    //             const remainOrderDetails = orderDetails.filter((x: any) => {
+    //               return (
+    //                 x.productId.toString() !==
+    //                 currentProduct.productId.toString()
+    //               );
+    //             });
+    //             await axiosClient.patch("orders/" + selectedOrder._id, {
+    //               orderDetails: remainOrderDetails,
+    //             });
+    //           }
 
-              setAddProductsModalVisible(false);
-              message.success("Xóa thành công");
-              setRefresh((f) => f + 1);
-            }}
-          >
-            Xóa
-          </Button>
-        );
-      },
-    },
+    //           setAddProductsModalVisible(false);
+    //           message.success("Xóa thành công");
+    //           setRefresh((f) => f + 1);
+    //         }}
+    //       >
+    //         Xóa
+    //       </Button>
+    //     );
+    //   },
+    // },
   ];
 
   // Orders

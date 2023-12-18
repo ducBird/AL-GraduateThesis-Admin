@@ -9,7 +9,7 @@ import {
   Legend,
 } from "recharts";
 import { IOrders } from "../../interfaces/IOrders";
-
+import numeral from "numeral";
 interface Props {
   orders: IOrders[];
   startDate: string;
@@ -57,7 +57,7 @@ const ChartOrderPaymentStatusTrue = (props: Props) => {
   // Chuyển đổi thành dạng mảng để sử dụng trong biểu đồ
   const chartData = Object.keys(dailyTotal).map((date) => ({
     name: formatDate(date),
-    "Tổng tiền": dailyTotal[date],
+    "Tổng thu": dailyTotal[date],
   }));
   return (
     <div style={{ textAlign: "center" }}>
@@ -71,11 +71,15 @@ const ChartOrderPaymentStatusTrue = (props: Props) => {
           <XAxis dataKey="name" />
           <YAxis />
           <CartesianGrid strokeDasharray="3 3" />
-          <Tooltip />
+          <Tooltip
+            formatter={(value) =>
+              numeral(value).format("0,0").replace(/,/g, ".") + " vnđ"
+            }
+          />
           <Legend />
           <Line
             type="monotone"
-            dataKey="Tổng tiền"
+            dataKey="Tổng thu"
             stroke="#261dc1"
             activeDot={{ r: 8 }}
           />

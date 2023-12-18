@@ -677,6 +677,7 @@ export default function Products() {
           onChange={() => {
             setIsVariant(!isVariant);
           }}
+          disabled={editFormVisible}
         />
       ),
     },
@@ -685,6 +686,12 @@ export default function Products() {
       label: "Giá",
       initialValue: undefined,
       noStyle: isVariant ? true : false,
+      rules: [
+        {
+          required: true,
+          message: "Giá không được để trống!",
+        },
+      ],
       component: (
         <InputNumber
           style={{
@@ -698,10 +705,267 @@ export default function Products() {
       label: "Số lượng",
       initialValue: undefined,
       noStyle: isVariant ? true : false,
+      rules: [
+        {
+          required: true,
+          message: "Số lượng không được để trống!",
+        },
+      ],
       component: (
         <InputNumber
           style={{
             display: isVariant ? "none" : "",
+          }}
+        />
+      ),
+    },
+    {
+      name: "discount",
+      label: "Giảm giá",
+      initialValue: 0,
+      rules: [
+        {
+          validator: (_: any, value: any) => {
+            if (value < 0) {
+              return Promise.reject(new Error("Giảm giá từ 0% đến 100%"));
+            } else if (value > 100) {
+              return Promise.reject(new Error("Giảm giá từ 0% đến 100%"));
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
+      component: <InputNumber maxLength={3} addonAfter="%" />,
+    },
+    {
+      name: "soft_order",
+      label: "Thứ tự xếp",
+      initialValue: 10,
+      component: <InputNumber />,
+    },
+    {
+      name: "file",
+      label: "Hình ảnh",
+      component: (
+        <Upload
+          showUploadList={true}
+          beforeUpload={(file) => {
+            setFile(file);
+            return false;
+          }}
+        >
+          <Button icon={<UploadOutlined />}>Tải lên hình ảnh</Button>
+        </Upload>
+      ),
+    },
+    {
+      name: "createdAt",
+      label: "Ngày tạo",
+      noStyle: createFormVisible ? true : editFormVisible ? false : true,
+      //muốn input trong antd không hiện thị lên thì cần thuộc tính noStyle: true (của antd) và style={display:none} (của css)
+      component: (
+        <DatePicker
+          style={{
+            display: createFormVisible ? "none" : editFormVisible ? "" : "none",
+          }}
+          disabled
+          format={"YYYY/MM/DD-HH:mm:ss"}
+        />
+      ),
+    },
+    {
+      name: "updatedAt",
+      label: "Ngày sửa",
+      noStyle: createFormVisible ? true : editFormVisible ? false : true,
+      component: (
+        <DatePicker
+          style={{
+            display: createFormVisible ? "none" : editFormVisible ? "" : "none",
+          }}
+          disabled
+          format={"YYYY/MM/DD-HH:mm:ss"}
+        />
+      ),
+    },
+    {
+      name: "description",
+      label: "Mô tả",
+      initialValue: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+      component: <TextArea rows={3} />,
+    },
+    // {
+    //   name: "variantButton",
+    //   component: editFormVisible ? (
+    //     <Button
+    //       type="dashed"
+    //       onClick={() => {
+    //         setOpenModalAttribute(true);
+    //       }}
+    //     >
+    //       Biến thể
+    //     </Button>
+    //   ) : (
+    //     <></>
+    //   ),
+    // },
+  ];
+  const productUpdateField = [
+    {
+      name: "name",
+      label: "Tên",
+      rules: [
+        {
+          required: true,
+          message: "Tên không được để trống!",
+        },
+      ],
+      component: <Input />,
+    },
+    {
+      name: "category_id",
+      label: "Danh mục",
+      rules: [
+        {
+          required: true,
+          message: "Danh mục không được để trống!",
+        },
+      ],
+      component: !editFormVisible ? (
+        <Select
+          allowClear
+          onChange={handleCategoryChange}
+          options={
+            categories &&
+            categories.map((category) => {
+              return {
+                value: category._id,
+                label: category.name,
+              };
+            })
+          }
+        />
+      ) : (
+        <Select
+          allowClear
+          options={
+            categories &&
+            categories.map((category) => {
+              return {
+                value: category._id,
+                label: category.name,
+              };
+            })
+          }
+        />
+      ),
+    },
+    {
+      name: "sub_category_id",
+      label: "Danh mục con",
+      /* sử dụng defaultValue ở phía dưới sẽ bị antd cảnh báo nên sử dụng initialValue cho field ở <CustomForm /> */
+      // initialValue: editFormVisible
+      //   ? [
+      //       {
+      //         value: selectedRecord?.sub_category?._id,
+      //         label: selectedRecord?.sub_category?.name,
+      //       },
+      //     ]
+      //   : "",
+      component: !editFormVisible ? (
+        <Select
+          allowClear
+          disabled={selectedCategoryId ? false : true}
+          options={
+            subCategoriesCreateForm &&
+            subCategoriesCreateForm.map((subCategory) => {
+              return {
+                value: subCategory._id,
+                label: subCategory.name,
+              };
+            })
+          }
+        />
+      ) : (
+        <Select
+          // defaultValue={[
+          //   {
+          //     value: selectedRecord?.sub_category?._id,
+          //     label: selectedRecord?.sub_category?.name,
+          //   },
+          // ]}
+          allowClear
+          options={
+            subCategoriesUpdateForm &&
+            subCategoriesUpdateForm.map((subCategory) => {
+              return {
+                value: subCategory._id,
+                label: subCategory.name,
+              };
+            })
+          }
+        />
+      ),
+    },
+    {
+      name: "is_variant",
+      label: "Biến thể",
+      initialValue: false,
+      component: (
+        <Switch
+          // checked={isVariant}
+          checked={editFormVisible ? selectedRecord.is_variant : isVariant}
+          checkedChildren="Có"
+          unCheckedChildren="Không"
+          onChange={() => {
+            setIsVariant(!isVariant);
+          }}
+          // disabled={editFormVisible}
+        />
+      ),
+    },
+    {
+      name: "price",
+      label: "Giá",
+      initialValue: undefined,
+      // noStyle: isVariant ? true : false,
+      noStyle:
+        selectedRecord.is_variant === false && editFormVisible
+          ? false
+          : isVariant
+          ? false
+          : true,
+      component: (
+        <InputNumber
+          style={{
+            display:
+              selectedRecord.is_variant === false && editFormVisible
+                ? ""
+                : isVariant
+                ? ""
+                : "none",
+          }}
+        />
+      ),
+    },
+    {
+      name: "stock",
+      label: "Số lượng",
+      initialValue: undefined,
+      noStyle:
+        selectedRecord.is_variant === false && editFormVisible
+          ? false
+          : isVariant
+          ? false
+          : true,
+      component: (
+        <InputNumber
+          style={{
+            display:
+              selectedRecord.is_variant === false && editFormVisible
+                ? ""
+                : isVariant
+                ? ""
+                : "none",
           }}
         />
       ),
@@ -1050,7 +1314,7 @@ export default function Products() {
           formName={"update-form"}
           onFinish={onUpdateFinish}
           onFinishFailed={onUpdateFinishFailed}
-          fields={productField}
+          fields={productUpdateField}
         />
       </Modal>
 

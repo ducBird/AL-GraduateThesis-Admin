@@ -4,4 +4,5 @@ export interface IAccumulated {
   percent?: number;
   createdAt?: Date;
   updatedAt?: Date;
+  isActive?: boolean;
 }

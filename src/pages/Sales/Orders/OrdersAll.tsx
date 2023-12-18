@@ -9,14 +9,14 @@ import {
   Tag,
 } from "antd";
 import numeral from "numeral";
-import React from "react";
+import React, { useEffect } from "react";
 import { axiosClient } from "../../../libraries/axiosClient";
 import locale from "antd/lib/date-picker/locale/vi_VN";
-import { OrderPaymentInformation } from "../../../meta/OrderPaymentInformation";
 import { IOrders } from "../../../interfaces/IOrders";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import ExcelJS from "exceljs";
+import { PieChart, Pie, Legend, Tooltip, Cell, Label } from "recharts";
 import {
   CheckCircleFilled,
   CheckCircleOutlined,
@@ -25,19 +25,17 @@ import {
   ClockCircleOutlined,
   CloseCircleFilled,
   CloseCircleOutlined,
-  DeleteOutlined,
-  EditOutlined,
   LoginOutlined,
   PlayCircleOutlined,
   RollbackOutlined,
   SelectOutlined,
 } from "@ant-design/icons";
-function OrdersByPaymentInformation() {
+function OrdersAll() {
   const [isModalVisible, setIsModalVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [orders, setOrders] = React.useState<IOrders[]>([]);
-  const [oderValue, setOrderValue] = React.useState<string>("Tất cả đơn hàng");
   const [searchForm] = Form.useForm();
+  const [oderValue, setOrderValue] = React.useState<string>("Tất cả đơn hàng");
   dayjs.extend(customParseFormat);
   // Ngày hiện tại
   const today = dayjs();
@@ -128,21 +126,22 @@ function OrdersByPaymentInformation() {
         : "Chưa thanh toán"
       : "Null";
   };
+
   // Sử dụng filter để lọc ra các hóa đơn đã thanh toán (payment_status === true)
   const paidOrders = orders.filter((order) => order?.payment_status === true);
   // Sử dụng filter để lọc ra các hóa đơn có (payment_information === VNPAY)
   const paymentVnpay = orders.filter(
     (order) => order?.payment_information === "VNPAY"
   );
-  // Sử dụng filter để lọc ra các hóa đơn có (payment_information === PAYPAL)
+  // Sử dụng filter để lọc ra các hóa đơn có (payment_information === paypal)
   const paymentPaypal = orders.filter(
     (order) => order?.payment_information === "PAYPAL"
   );
-  // Sử dụng filter để lọc ra các hóa đơn có (payment_information === MOMO)
+  // Sử dụng filter để lọc ra các hóa đơn có (payment_information === paypal)
   const paymentMoMo = orders.filter(
     (order) => order?.payment_information === "MOMO"
   );
-  // Sử dụng filter để lọc ra các hóa đơn có (payment_information === paypal)
+  // Sử dụng filter để lọc ra các hóa đơn có (payment_information === CASH)
   const paymentCod = orders.filter(
     (order) => order?.payment_information === "CASH"
   );
@@ -168,7 +167,7 @@ function OrdersByPaymentInformation() {
       dataIndex: "customer",
       key: "customer",
       render: (customer: any) => {
-        return <p>{customer.full_name}</p>;
+        return <p>{customer?.full_name}</p>;
       },
     },
     {
@@ -212,8 +211,8 @@ function OrdersByPaymentInformation() {
       title: "Nhân viên",
       dataIndex: "employee",
       key: "employee",
-      render: (text: string, record: any) => {
-        return <strong>{record.employee?.full_name}</strong>;
+      render: (employee: any) => {
+        return <strong>{employee?.full_name}</strong>;
       },
     },
     {
@@ -233,52 +232,24 @@ function OrdersByPaymentInformation() {
       },
     },
   ];
-  React.useEffect(() => {
+
+  useEffect(() => {
     axiosClient.get("/orders").then((response) => {
       setOrders(response.data);
-      console.log(response.data);
     });
   }, []);
   const onFinish = (values: any) => {
-    console.log(values);
-    // Lọc ra các thuộc tính không xác định
-    const filteredValues = Object.fromEntries(
-      Object.entries(values).filter(
-        ([_, value]) => value !== undefined && value !== ""
-      )
-    );
-
-    const numKeys = Object.keys(filteredValues).length;
-    console.log(numKeys);
-    setLoading(true);
-
-    if (numKeys > 1) {
-      axiosClient
-        .post("/orders/query-order-by-payment_information", values)
-        .then((response) => {
-          message.success("Thành công");
-          setOrders(response.data);
-          console.log(response.data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          message.error("Đã xảy ra lỗi, vui lòng kiểm tra lại!");
-          setLoading(false);
-        });
-    } else {
-      axiosClient
-        .post("/orders/query-one", values)
-        .then((response) => {
-          message.success("Thành công");
-          setOrders(response.data);
-          console.log(response.data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          message.error("Đã xảy ra lỗi, vui lòng kiểm tra lại!");
-          setLoading(false);
-        });
-    }
+    axiosClient
+      .post("/orders/query-order-fromday-today", values)
+      .then((response) => {
+        message.success("Thành công");
+        setOrders(response.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        message.error("Đã xảy ra lỗi, vui lòng kiểm tra lại!");
+        setLoading(false);
+      });
   };
 
   const onFinishFailed = (errors: any) => {
@@ -354,14 +325,80 @@ function OrdersByPaymentInformation() {
     a.click();
     URL.revokeObjectURL(url);
   };
+  const totalExpense = total - totalRevenue;
+
+  const revenuePercentage = totalRevenue;
+  const expensePercentage = totalExpense;
+  const datas = [
+    {
+      name: "Tổng thu",
+      value: revenuePercentage,
+    },
+    {
+      name: "Tổng chi",
+      value: expensePercentage,
+    },
+  ];
+  const COLORS = ["#177245", "#FF0000"];
+
   return (
     <div>
       <h1
         style={{ textAlign: "center", marginBottom: "50px", fontSize: "25px" }}
       >
-        THỐNG KÊ ĐƠN HÀNG THEO HÌNH THỨC THANH TOÁN
+        THỐNG KÊ TẤT CẢ ĐƠN HÀNG
       </h1>
-      <div>
+      <div style={{ marginLeft: "32%" }}>
+        <PieChart width={400} height={400}>
+          <Pie
+            data={datas}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            outerRadius={170}
+            fill="#8884d8"
+            labelLine={false}
+          >
+            {datas.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[index % COLORS.length]}
+              />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={(value) =>
+              numeral(value).format("0,0").replace(/,/g, ".") + " vnđ"
+            }
+          />
+          <Legend />
+        </PieChart>
+        <div style={{ marginLeft: "17%", fontSize: "15px" }}>
+          <p>
+            Tổng:{" "}
+            <span style={{ color: "blue" }}>
+              {numeral(total).format("0,0").replace(/,/g, ".")} vnđ
+            </span>
+          </p>
+          <p>
+            Tổng thu:{" "}
+            <span style={{ color: "green" }}>
+              {numeral(totalRevenue).format("0,0").replace(/,/g, ".")} vnđ
+            </span>
+          </p>
+          <p>
+            Tổng chi:{" "}
+            <span style={{ color: "red" }}>
+              {numeral(total - totalRevenue)
+                .format("0,0")
+                .replace(/,/g, ".")}{" "}
+              vnđ
+            </span>
+          </p>
+        </div>
+      </div>
+      <div style={{ marginTop: "40px", marginLeft: "17%" }}>
         <Form
           form={searchForm}
           name="search-form"
@@ -373,29 +410,15 @@ function OrdersByPaymentInformation() {
           autoComplete="on"
         >
           <Form.Item
-            label="Hình thức thanh toán"
-            name="payment_information"
+            label="Từ ngày"
+            name="fromDate"
             rules={[
               {
                 required: true,
-                message: "Hãy chọn hình thức thanh toán!",
+                message: "Hãy chọn từ ngày!",
               },
             ]}
           >
-            <Select
-              options={OrderPaymentInformation}
-              onChange={(value, option) => {
-                setOrderValue(`Đơn hàng - ${option.label}`);
-              }}
-            />
-          </Form.Item>
-          {/* <Form.Item label="Hình thức thanh toán" name="payment_information">
-            <Select options={OrderPaymentInformation} />
-          </Form.Item>
-          <Form.Item label="Trạng thái thanh toán" name="payment_status">
-            <Select options={OrderPaymentStatus} />
-          </Form.Item> */}
-          <Form.Item label="Từ ngày" name="fromDate">
             <DatePicker
               format="YYYY-MM-DD"
               locale={locale}
@@ -404,7 +427,16 @@ function OrdersByPaymentInformation() {
               }
             />
           </Form.Item>
-          <Form.Item label="Đến ngày" name="toDate">
+          <Form.Item
+            label="Đến ngày"
+            name="toDate"
+            rules={[
+              {
+                required: true,
+                message: "Hãy chọn đến ngày!",
+              },
+            ]}
+          >
             <DatePicker
               format="YYYY-MM-DD"
               locale={locale}
@@ -431,6 +463,14 @@ function OrdersByPaymentInformation() {
           </Form.Item>
         </Form>
       </div>
+      {/* <div
+          style={{
+            border: "1px solid gray",
+            height: "300px",
+            borderRadius: "10px",
+            backgroundColor: "white",
+          }}
+        ></div> */}
       <div style={{ margin: "10px 0", display: "flex" }}>
         <div style={{ flex: 1 }}>
           <Button
@@ -446,6 +486,7 @@ function OrdersByPaymentInformation() {
         </div>
       </div>
       <Table rowKey="_id" dataSource={orders} columns={columns} />
+
       <Modal open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <div
           style={{
@@ -515,4 +556,4 @@ function OrdersByPaymentInformation() {
   );
 }
 
-export default OrdersByPaymentInformation;
+export default OrdersAll;

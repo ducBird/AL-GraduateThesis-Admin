@@ -14,6 +14,7 @@ import {
   DatePicker,
   Switch,
   Upload,
+  Select,
 } from "antd";
 import numeral from "numeral";
 import moment from "moment";
@@ -37,7 +38,10 @@ function Vouchers() {
   const [createFormVisible, setCreateFormVisible] = useState(false);
   const [editFormDelete, setEditFormDelete] = useState(false);
   const [editFormVisible, setEditFormVisible] = useState(false);
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [isUpdateFormActive, setIsUpdateFormActive] = useState(false);
+  console.log("isUpdateFormActive", isUpdateFormActive);
+
   const [isFreeShipping, setIsFreeShipping] = useState(false);
   // File
   const [file, setFile] = useState<any>();
@@ -123,7 +127,6 @@ function Vouchers() {
       dataIndex: "isActive",
       key: "isActive",
       render: (text, record) => {
-        console.log(text); // Giá trị của trường isActive
         if (text) {
           return <span style={{ color: "green" }}>Đang hoạt động</span>;
         } else {
@@ -170,8 +173,10 @@ function Vouchers() {
                     expirationDate: formatedExpirationDate,
                     createdAt: formattedCreatedAt,
                     updatedAt: formattedUpdatedAt,
+                    isActive: record.isActive,
                   };
                   setSelectedRecord(updatedRecord);
+                  setIsUpdateFormActive(record.isActive);
                   updateForm.setFieldsValue(updatedRecord);
                   setEditFormVisible(true);
                 }}
@@ -211,7 +216,7 @@ function Vouchers() {
   const voucherField = [
     {
       name: "isActive",
-      label: "Trạng thái hoạt động",
+      label: "Trạng thái",
       rules: [
         {
           required: true,
@@ -227,6 +232,234 @@ function Vouchers() {
           unCheckedChildren="Tắt"
           onChange={() => {
             setIsActive(!isActive);
+          }}
+        />
+      ),
+    },
+    {
+      name: "isFreeShipping",
+      label: "Loại vouchers",
+      rules: [
+        {
+          required: true,
+          message: "Miễn phí vận chuyển không được để trống!",
+        },
+      ],
+      initialValue: false,
+      component: (
+        <Switch
+          style={{ width: "150px" }}
+          checked={
+            editFormVisible ? selectedRecord.isFreeShipping : isFreeShipping
+          }
+          checkedChildren="Voucher free ship"
+          unCheckedChildren="Voucher giảm giá"
+          onChange={() => {
+            setIsFreeShipping(!isFreeShipping);
+          }}
+          disabled={editFormVisible}
+        />
+      ),
+    },
+    {
+      name: "name",
+      label: "Tên voucher",
+      rules: [
+        {
+          required: true,
+          message: "Tên không được để trống!",
+        },
+      ],
+      component: <Input />,
+    },
+    {
+      name: "price",
+      label: "Giá",
+      initialValue: undefined,
+      noStyle:
+        selectedRecord.isFreeShipping === true && editFormVisible
+          ? false
+          : isFreeShipping
+          ? false
+          : true,
+      rules: [
+        {
+          required:
+            selectedRecord.isFreeShipping === true && editFormVisible
+              ? true
+              : isFreeShipping
+              ? true
+              : false,
+          message:
+            selectedRecord.isFreeShipping === true && editFormVisible
+              ? "Giá giảm không được để trống!"
+              : isFreeShipping
+              ? "Giá giảm không được để trống!"
+              : "",
+        },
+      ],
+      component: (
+        <InputNumber
+          style={{
+            display:
+              selectedRecord.isFreeShipping === true && editFormVisible
+                ? ""
+                : isFreeShipping
+                ? ""
+                : "none",
+            width: "200px",
+          }}
+        />
+      ),
+    },
+    {
+      name: "discountPercentage",
+      label: "Phần trăm giảm",
+      initialValue: undefined,
+      noStyle:
+        selectedRecord.isFreeShipping === true && editFormVisible
+          ? true
+          : isFreeShipping
+          ? true
+          : false,
+      rules: [
+        {
+          required:
+            selectedRecord.isFreeShipping === true && editFormVisible
+              ? false
+              : !isFreeShipping
+              ? true
+              : false,
+          message: !isFreeShipping ? "Phần trăm giảm không được để trống!" : "",
+        },
+      ],
+      component: (
+        <InputNumber
+          style={{
+            display:
+              selectedRecord.isFreeShipping === true
+                ? "none"
+                : !isFreeShipping
+                ? ""
+                : "none",
+            width: "200px",
+          }}
+        />
+      ),
+    },
+    {
+      name: "maxDiscountAmount",
+      label: "Giá giảm tối đa",
+      initialValue: undefined,
+      noStyle:
+        selectedRecord.isFreeShipping === true && editFormVisible
+          ? true
+          : isFreeShipping
+          ? true
+          : false,
+      rules: [
+        {
+          required:
+            selectedRecord.isFreeShipping === true && editFormVisible
+              ? false
+              : !isFreeShipping
+              ? true
+              : false,
+          message: !isFreeShipping
+            ? "Giá giảm tối đa không được để trống!"
+            : "",
+        },
+      ],
+      component: (
+        <InputNumber
+          style={{
+            display:
+              selectedRecord.isFreeShipping === true
+                ? "none"
+                : !isFreeShipping
+                ? ""
+                : "none",
+            width: "200px",
+          }}
+        />
+      ),
+    },
+    {
+      name: "minimumOrderAmount",
+      label: "Giá đơn hàng tối thiểu",
+      rules: [
+        {
+          required: true,
+          message: "Giá giảm tối đa không được để trống!",
+        },
+      ],
+      component: <InputNumber style={{ width: "200px" }} />,
+    },
+    {
+      name: "condition",
+      label: "Điều kiện",
+      component: <TextArea rows={3} />,
+    },
+    {
+      name: "startDate",
+      label: "Ngày bắt đầu",
+      rules: [
+        {
+          required: true,
+          message: "Ngày bắt đầu không được để trống!",
+        },
+      ],
+      // component: <DatePicker format={"YYYY/MM/DD-HH:mm:ss"} />,
+      component: <Input />,
+    },
+    {
+      name: "expirationDate",
+      label: "Ngày kết thúc",
+      rules: [
+        {
+          required: true,
+          message: "Ngày kết thúc không được để trống!",
+        },
+      ],
+      // component: <DatePicker format={"YYYY/MM/DD-HH:mm:ss"} />,
+      component: <Input />,
+    },
+    {
+      name: "file",
+      label: "Hình ảnh",
+      component: (
+        <Upload
+          showUploadList={true}
+          beforeUpload={(file) => {
+            setFile(file);
+            return false;
+          }}
+        >
+          <Button icon={<UploadOutlined />}>Tải lên hình ảnh</Button>
+        </Upload>
+      ),
+    },
+  ];
+
+  const voucherUpdateField = [
+    {
+      name: "isActive",
+      label: "Trạng thái",
+      rules: [
+        {
+          required: true,
+          message: "Trạng thái hoạt động không được để trống!",
+        },
+      ],
+      initialValue: false,
+      component: (
+        <Switch
+          style={{ width: "60px" }}
+          checked={isUpdateFormActive}
+          checkedChildren="Bật"
+          unCheckedChildren="Tắt"
+          onChange={() => {
+            setIsUpdateFormActive(!isUpdateFormActive);
           }}
         />
       ),
@@ -558,7 +791,6 @@ function Vouchers() {
         }}
         onCancel={() => {
           setEditFormVisible(false);
-          setSelectedRecord({});
         }}
         okText="Lưu"
         cancelText="Đóng"
@@ -568,7 +800,7 @@ function Vouchers() {
           formName={"update-form"}
           onFinish={onUpdateFinish}
           onFinishFailed={onUpdateFinishFailed}
-          fields={voucherField}
+          fields={voucherUpdateField}
         />
       </Modal>
       <Table rowKey={"_id"} dataSource={vouchers} columns={columns} />

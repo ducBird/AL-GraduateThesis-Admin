@@ -22,6 +22,7 @@ import OrdersByPaymentStatus from "./pages/Sales/Orders/OrdersByPaymentStatus";
 import Vouchers from "./pages/Management/Vouchers";
 import PurchaseOrder from "./pages/Shipping/PurchaseOrder";
 import ReturnOrder from "./pages/Shipping/ReturnOrder";
+import OrdersAll from "./pages/Sales/Orders/OrdersAll";
 numeral.locale("vi");
 
 const { Header, Content, Sider } = Layout;
@@ -125,6 +126,10 @@ function App() {
                   <Route
                     path="/sales/orders/by/payment_status"
                     element={<OrdersByPaymentStatus />}
+                  />
+                  <Route
+                    path="sales/statistics/orders/all"
+                    element={<OrdersAll />}
                   />
                   {/* end thống kê */}
                   {/* Vận chuyển */}

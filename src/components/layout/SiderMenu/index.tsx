@@ -89,6 +89,10 @@ export default function SiderMenu() {
               icon: <MdOutlineArticle />,
               children: [
                 {
+                  label: "Tất cả đơn hàng",
+                  key: "sales-statistics-orders-all",
+                },
+                {
                   label: "Theo trạng thái",
                   key: "sales-orders-by-status",
                 },
@@ -103,10 +107,6 @@ export default function SiderMenu() {
                 {
                   label: "Theo số điện thoại",
                   key: "sales-statistics-orders-number",
-                },
-                {
-                  label: "Theo ngày cần tìm",
-                  key: "sales-statistics-orders-day",
                 },
               ],
             },

@@ -160,15 +160,6 @@ function OrdersByStatus() {
   // Orders
   const columns = [
     {
-      title: "STT",
-      dataIndex: "orderNumber",
-      key: "orderNumber",
-      render: (_: any, __: any, index: number) => {
-        // Sử dụng index + 1 để có số thứ tự bắt đầu từ 1
-        return <p>{index + 1}</p>;
-      },
-    },
-    {
       title: "Mã Đơn hàng",
       dataIndex: "_id",
       key: "_id",
