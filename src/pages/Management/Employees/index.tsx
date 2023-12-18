@@ -20,6 +20,8 @@ import CustomForm from "../../../components/common/CustomForm";
 import axios from "axios";
 import { API_URL } from "../../../constants/URLS";
 import {
+  CheckCircleFilled,
+  CloseCircleFilled,
   DeleteOutlined,
   EditOutlined,
   QuestionCircleOutlined,
@@ -270,6 +272,33 @@ export default function Employees() {
       key: "birth_day",
     },
     {
+      title: "Trạng thái",
+      dataIndex: "active",
+      key: "active",
+      filters: [
+        {
+          text: "Kích hoạt",
+          value: true,
+        },
+        {
+          text: "Thu hồi",
+          value: false,
+        },
+      ],
+      onFilter: (value: boolean, record: any) => record.active === value,
+      render: (text: boolean) => {
+        return (
+          <p style={{ textAlign: "center" }}>
+            {text ? (
+              <CheckCircleFilled style={{ color: "green" }} />
+            ) : (
+              <CloseCircleFilled style={{ color: "red" }} />
+            )}
+          </p>
+        );
+      },
+    },
+    {
       title: "",
       key: "actions",
       render: (record) => {
@@ -288,15 +317,15 @@ export default function Employees() {
                     record.updatedAt,
                     "YYYY-MM-DD HH:mm:ss"
                   );
-                  // const formattedBirthday = moment(
-                  //   record.birth_day,
-                  //   "YYYY-MM-DD HH:mm:ss"
-                  // );
+                  const formattedBirthday = moment(
+                    record.birth_day,
+                    "YYYY-MM-DD HH:mm:ss"
+                  );
                   const updatedRecord = {
                     ...restOfRecord,
                     createdAt: formattedCreatedAt,
                     updatedAt: formattedUpdatedAt,
-                    // birth_day: formattedBirthday,
+                    birth_day: formattedBirthday,
                   };
                   setSelectedRecord(updatedRecord);
                   updateForm.setFieldsValue(updatedRecord);
@@ -537,6 +566,21 @@ export default function Employees() {
               validator: validatePassword,
             },
           ]
+        : createFormVisible
+        ? [
+            {
+              required: true,
+              message: "Mật khẩu không được để trống!",
+            },
+            {
+              min: 5,
+              max: 50,
+              message: "Độ dài mật khẩu từ 5-50 kí tự",
+            },
+            {
+              validator: validatePassword,
+            },
+          ]
         : "",
       noStyle: createFormVisible ? false : showPassword ? false : true,
       component: (
@@ -721,6 +765,7 @@ export default function Employees() {
             });
         }
         updateForm.resetFields();
+        setShowPassword(false);
         setEditFormVisible(false);
         setRefresh((f) => f + 1);
         message.success("Cập nhật thành công!");
