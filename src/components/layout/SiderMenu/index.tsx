@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   AiOutlineHome,
   AiOutlineSetting,
@@ -16,12 +17,27 @@ import { FaWarehouse } from "react-icons/fa";
 import { FaShippingFast } from "react-icons/fa";
 import { RiLuggageDepositLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import { Menu } from "antd";
+import { Badge, Menu } from "antd";
 import { useUser } from "../../../hooks/useUser";
+import { axiosClient } from "../../../libraries/axiosClient";
 
 export default function SiderMenu() {
   const { users } = useUser((state) => state) as any;
   const navigate = useNavigate();
+  const [dataOrders, setDataOrders] = useState(0);
+  useEffect(() => {
+    axiosClient
+      .get("/orders")
+      .then((response) => {
+        const unapprovedOrder = response.data.filter(
+          (data: any) => data.employee_id === null
+        );
+        setDataOrders(unapprovedOrder.length);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   const itemsSider = [
     { label: "Trang Chủ", key: "home", icon: <AiOutlineHome /> }, // remember to pass the key prop
     {
@@ -44,7 +60,15 @@ export default function SiderMenu() {
           key: "management-products",
           icon: <AiOutlineShopping />,
         },
-        { label: "Đơn hàng", key: "sales-orders", icon: <MdOutlineArticle /> },
+        {
+          label: (
+            <span>
+              Đơn hàng <Badge count={dataOrders}></Badge>
+            </span>
+          ),
+          key: "sales-orders",
+          icon: <MdOutlineArticle />,
+        },
 
         {
           label: "Tích lũy tiền",
