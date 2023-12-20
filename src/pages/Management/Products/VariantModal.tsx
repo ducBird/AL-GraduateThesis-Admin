@@ -9,6 +9,7 @@ import {
   Table,
   message,
   Upload,
+  InputNumber,
 } from "antd";
 import {
   DeleteOutlined,
@@ -22,6 +23,7 @@ import { IProduct } from "../../../interfaces/Product";
 import { Variant } from "../../../interfaces/Variant";
 import { axiosClient } from "../../../libraries/axiosClient";
 import { API_URL } from "../../../constants/URLS";
+import { RcFile } from "antd/es/upload";
 
 interface IProps {
   productVariants: IProduct;
@@ -102,6 +104,15 @@ export default function VariantModal(props: IProps) {
     fetchData();
   }, [productVariants, refresh]);
 
+  // Upload ảnh đại diện (kiểm tra định dạng PNG/JPG của file upload)
+  const beforeUpload = (file: RcFile) => {
+    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+    if (!isJpgOrPng) {
+      message.error("Bạn chỉ có thể chọn file JPG/PNG!");
+    }
+    return isJpgOrPng;
+  };
+
   const variantColumns: ColumnsType<Variant> = [
     {
       dataIndex: "variant_image",
@@ -142,14 +153,14 @@ export default function VariantModal(props: IProps) {
         return <div>{text}</div>;
       },
     },
-    {
-      title: "Vị trí",
-      dataIndex: "position",
-      key: "position",
-      render: (text) => {
-        return <div>{text}</div>;
-      },
-    },
+    // {
+    //   title: "Vị trí",
+    //   dataIndex: "position",
+    //   key: "position",
+    //   render: (text) => {
+    //     return <div>{text}</div>;
+    //   },
+    // },
     {
       title: "",
       key: "actions",
@@ -207,9 +218,9 @@ export default function VariantModal(props: IProps) {
               console.log(err);
             });
         }
+        message.success("Cập nhật thành công!");
         variantForm.resetFields();
         setRefresh((f) => f + 1);
-        console.log("ok");
 
         setOpenDetailVariant(false);
       })
@@ -262,17 +273,55 @@ export default function VariantModal(props: IProps) {
             onFinishFailed={onVariantFinishFailed}
           >
             <Form.Item label={`Tên biến thể`} name={"title"}>
-              <Input />
+              <Input disabled />
             </Form.Item>
-            <Form.Item label={`Giá`} name={"price"}>
-              <Input />
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Giá không được để trống!",
+                },
+                {
+                  validator: (_: any, value: any) => {
+                    if (value <= 0) {
+                      return Promise.reject(
+                        new Error("Giá không được nhỏ hơn 1")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+              label={`Giá`}
+              name={"price"}
+            >
+              <InputNumber />
             </Form.Item>
-            <Form.Item label={`Số lượng`} name={"stock"}>
-              <Input />
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Số lượng không được để trống!",
+                },
+                {
+                  validator: (_: any, value: any) => {
+                    if (value < 0) {
+                      return Promise.reject(
+                        new Error("Số lượng không được nhỏ hơn 0")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+              label={`Số lượng`}
+              name={"stock"}
+            >
+              <InputNumber />
             </Form.Item>
-            <Form.Item label={`Vị trí`} name={"position"}>
+            {/* <Form.Item label={`Vị trí`} name={"position"}>
               <Input />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item label="Hình ảnh" name="file">
               <Upload
                 showUploadList={true}

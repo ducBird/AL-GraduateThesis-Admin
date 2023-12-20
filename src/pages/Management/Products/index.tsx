@@ -677,7 +677,6 @@ export default function Products() {
           onChange={() => {
             setIsVariant(!isVariant);
           }}
-          disabled={editFormVisible}
         />
       ),
     },
@@ -686,12 +685,22 @@ export default function Products() {
       label: "Giá",
       initialValue: undefined,
       noStyle: isVariant ? true : false,
-      rules: [
-        {
-          required: true,
-          message: "Giá không được để trống!",
-        },
-      ],
+      rules: !isVariant
+        ? [
+            {
+              required: true,
+              message: "Giá không được để trống!",
+            },
+            {
+              validator: (_: any, value: any) => {
+                if (value <= 0) {
+                  return Promise.reject(new Error("Giá không được nhỏ hơn 1"));
+                }
+                return Promise.resolve();
+              },
+            },
+          ]
+        : "",
       component: (
         <InputNumber
           style={{
@@ -705,12 +714,24 @@ export default function Products() {
       label: "Số lượng",
       initialValue: undefined,
       noStyle: isVariant ? true : false,
-      rules: [
-        {
-          required: true,
-          message: "Số lượng không được để trống!",
-        },
-      ],
+      rules: !isVariant
+        ? [
+            {
+              required: true,
+              message: "Số lượng không được để trống!",
+            },
+            {
+              validator: (_: any, value: any) => {
+                if (value < 0) {
+                  return Promise.reject(
+                    new Error("Số lượng không được nhỏ hơn 0")
+                  );
+                }
+                return Promise.resolve();
+              },
+            },
+          ]
+        : "",
       component: (
         <InputNumber
           style={{
@@ -910,7 +931,18 @@ export default function Products() {
       name: "is_variant",
       label: "Biến thể",
       initialValue: false,
-      component: (
+      component: editFormVisible ? (
+        <Switch
+          disabled
+          // checked={isVariant}
+          checked={editFormVisible ? selectedRecord.is_variant : isVariant}
+          checkedChildren="Có"
+          unCheckedChildren="Không"
+          onChange={() => {
+            setIsVariant(!isVariant);
+          }}
+        />
+      ) : (
         <Switch
           // checked={isVariant}
           checked={editFormVisible ? selectedRecord.is_variant : isVariant}
@@ -919,7 +951,6 @@ export default function Products() {
           onChange={() => {
             setIsVariant(!isVariant);
           }}
-          // disabled={editFormVisible}
         />
       ),
     },
@@ -934,6 +965,22 @@ export default function Products() {
           : isVariant
           ? false
           : true,
+      rules: !isVariant
+        ? [
+            {
+              required: true,
+              message: "Giá không được để trống!",
+            },
+            {
+              validator: (_: any, value: any) => {
+                if (value <= 0) {
+                  return Promise.reject(new Error("Giá không được nhỏ hơn 1"));
+                }
+                return Promise.resolve();
+              },
+            },
+          ]
+        : "",
       component: (
         <InputNumber
           style={{
@@ -957,6 +1004,24 @@ export default function Products() {
           : isVariant
           ? false
           : true,
+      rules: !isVariant
+        ? [
+            {
+              required: true,
+              message: "Số lượng không được để trống!",
+            },
+            {
+              validator: (_: any, value: any) => {
+                if (value < 0) {
+                  return Promise.reject(
+                    new Error("Số lượng không được nhỏ hơn 0")
+                  );
+                }
+                return Promise.resolve();
+              },
+            },
+          ]
+        : "",
       component: (
         <InputNumber
           style={{
@@ -1097,7 +1162,7 @@ export default function Products() {
             .post(`${API_URL}/upload/products/${_id}`, formData)
             .then((response) => {
               setRefresh((f) => f + 1);
-              message.success("Thêm mới thành công!");
+              message.success("Tải lên hình ảnh thành công!");
             })
             .catch((err) => {
               message.error("Tải lên hình ảnh thất bại!");
