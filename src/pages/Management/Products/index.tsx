@@ -762,6 +762,16 @@ export default function Products() {
       name: "soft_order",
       label: "Thứ tự xếp",
       initialValue: 10,
+      rules: [
+        {
+          validator: (_: any, value: any) => {
+            if (value <= 0) {
+              return Promise.reject(new Error("Thứ tự xếp không nhỏ hơn 1"));
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
       component: <InputNumber />,
     },
     {
@@ -771,6 +781,12 @@ export default function Products() {
         <Upload
           showUploadList={true}
           beforeUpload={(file) => {
+            const isJpgOrPng =
+              file.type === "image/jpeg" || file.type === "image/png";
+            if (!isJpgOrPng) {
+              message.error("Bạn chỉ có thể chọn file JPG/PNG!");
+            }
+            // return isJpgOrPng;
             setFile(file);
             return false;
           }}
@@ -1057,6 +1073,16 @@ export default function Products() {
       name: "soft_order",
       label: "Thứ tự xếp",
       initialValue: 10,
+      rules: [
+        {
+          validator: (_: any, value: any) => {
+            if (value <= 0) {
+              return Promise.reject(new Error("Thứ tự xếp không nhỏ hơn 1"));
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
       component: <InputNumber />,
     },
     {
@@ -1066,6 +1092,12 @@ export default function Products() {
         <Upload
           showUploadList={true}
           beforeUpload={(file) => {
+            const isJpgOrPng =
+              file.type === "image/jpeg" || file.type === "image/png";
+            if (!isJpgOrPng) {
+              message.error("Bạn chỉ có thể chọn file JPG/PNG!");
+            }
+            // return isJpgOrPng;
             setFile(file);
             return false;
           }}

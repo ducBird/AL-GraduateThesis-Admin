@@ -326,6 +326,12 @@ export default function VariantModal(props: IProps) {
               <Upload
                 showUploadList={true}
                 beforeUpload={(file) => {
+                  const isJpgOrPng =
+                    file.type === "image/jpeg" || file.type === "image/png";
+                  if (!isJpgOrPng) {
+                    message.error("Bạn chỉ có thể chọn file JPG/PNG!");
+                  }
+                  // return isJpgOrPng;
                   setFile(file);
                   return false;
                 }}

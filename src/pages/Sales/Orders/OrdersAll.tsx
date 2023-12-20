@@ -162,14 +162,14 @@ function OrdersAll() {
       dataIndex: "_id",
       key: "_id",
     },
-    {
-      title: "Khách hàng",
-      dataIndex: "customer",
-      key: "customer",
-      render: (customer: any) => {
-        return <p>{customer?.full_name}</p>;
-      },
-    },
+    // {
+    //   title: "Khách hàng",
+    //   dataIndex: "customer",
+    //   key: "customer",
+    //   render: (customer: any) => {
+    //     return <p>{customer?.full_name}</p>;
+    //   },
+    // },
     {
       title: "Số điện thoại",
       dataIndex: "phoneNumber",
