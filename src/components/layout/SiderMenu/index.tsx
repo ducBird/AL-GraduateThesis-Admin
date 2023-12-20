@@ -89,22 +89,22 @@ export default function SiderMenu() {
                   label: "Theo trạng thái thanh toán",
                   key: "sales-orders-by-payment_status",
                 },
-                {
-                  label: "Theo số điện thoại",
-                  key: "sales-statistics-orders-number",
-                },
+                // {
+                //   label: "Theo số điện thoại",
+                //   key: "sales-statistics-orders-number",
+                // },
               ],
             },
-            {
-              label: "Sản phẩm",
-              key: "sales-statistics-products",
-              icon: <AiOutlineShopping />,
-            },
-            {
-              label: "Khách hàng",
-              key: "sales-statistics-customers",
-              icon: <MdOutlinePeopleAlt />,
-            },
+            // {
+            //   label: "Sản phẩm",
+            //   key: "sales-statistics-products",
+            //   icon: <AiOutlineShopping />,
+            // },
+            // {
+            //   label: "Khách hàng",
+            //   key: "sales-statistics-customers",
+            //   icon: <MdOutlinePeopleAlt />,
+            // },
           ],
         },
       ],
@@ -118,10 +118,10 @@ export default function SiderMenu() {
       icon: <FaShippingFast />,
       children: [
         { label: "Đơn mua", key: "shipping-purchase" },
-        {
-          label: "Đơn trả",
-          key: "shipping-return",
-        },
+        // {
+        //   label: "Đơn trả",
+        //   key: "shipping-return",
+        // },
       ],
     },
   ];
